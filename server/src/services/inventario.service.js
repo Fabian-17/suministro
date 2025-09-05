@@ -70,3 +70,28 @@ export const eliminarInventario = async (id) => {
         throw new Error("Error al eliminar el inventario: " + error.message);
     }
 };
+
+export const bulkCrearInventario = async (dataArray) => {
+  try {
+    for (const row of dataArray) {
+      if (!row.articulo || !row.cantidad || !row.codigo) continue;
+
+      // Buscar si el artículo ya existe
+      const existente = await Inventario.findOne({ where: { articulo: row.articulo } });
+
+      if (existente) {
+        // Sumar la cantidad en lugar de reemplazar
+        const nuevaCantidad = existente.cantidad + row.cantidad;
+        await existente.update({ cantidad: nuevaCantidad, codigo: row.codigo });
+      } else {
+        await Inventario.create({
+          articulo: row.articulo,
+          cantidad: row.cantidad,
+          codigo: row.codigo
+        });
+      }
+    }
+  } catch (error) {
+    throw new Error("Error al procesar el archivo: " + error.message);
+  }
+};

@@ -3,7 +3,7 @@ import { Inventario } from "../models/inventario.js";
 
 
 export const crearSalida = async (data) => {
-    const { articulo, cantidad, fecha, area, destinatario } = data;
+    const { articulo, cantidad, fecha, area, destinatario, codigo } = data;
     try {
         const inventario = await Inventario.findOne({ where: { articulo } });
         if (!inventario) {
@@ -15,9 +15,11 @@ export const crearSalida = async (data) => {
         const nuevaSalida = await Salida.create({
             articulo,
             cantidad,
+            codigo: codigo || inventario.codigo,
             fecha,
             area,
-            destinatario
+            destinatario,
+            inventarioId: inventario.id
         });
         await inventario.update({ cantidad: inventario.cantidad - cantidad });
         return nuevaSalida;

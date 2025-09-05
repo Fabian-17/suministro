@@ -6,11 +6,11 @@ import { crearEntrada,
 
 export const crearEntradaController = async (req, res) => {
     try {
-        const { articulo, cantidad, codigo } = req.body;
-        if (!articulo || !cantidad || !codigo) {
+        const { articulo, cantidad, codigo, fecha } = req.body;
+        if (!articulo || !cantidad || !codigo || !fecha) {
             return res.status(400).json({ error: "Faltan datos requeridos" });
         }
-        const nuevaEntrada = await crearEntrada({ articulo, cantidad, codigo });
+        const nuevaEntrada = await crearEntrada({ articulo, cantidad, codigo, fecha });
         res.status(201).json(nuevaEntrada);
     } catch (error) {
         res.status(500).json({ error: error.message });

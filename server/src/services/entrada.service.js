@@ -5,17 +5,20 @@ import { Inventario } from "../models/inventario.js";
 export const crearEntrada = async (data) => {
     const { articulo, cantidad, fecha, codigo } = data;
     try {
-        const inventario = await Inventario.findOne({ where: { articulo } });
+        let inventario = await Inventario.findOne({ where: { articulo } });
         if (!inventario) {
-            throw new Error("Artículo no encontrado en inventario");
+            // Si no existe, lo crea con la cantidad de la entrada y el código
+            inventario = await Inventario.create({ articulo, cantidad, codigo });
+        } else {
+            await inventario.update({ cantidad: inventario.cantidad + cantidad });
         }
         const nuevaEntrada = await Entrada.create({
             articulo,
             cantidad,
             fecha,
-            codigo
+            codigo,
+            inventarioId: inventario.id
         });
-        await inventario.update({ cantidad: inventario.cantidad + cantidad });
         return nuevaEntrada;
     } catch (error) {
         throw new Error("Error al crear la entrada: " + error.message);
