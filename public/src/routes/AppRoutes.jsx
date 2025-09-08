@@ -7,6 +7,8 @@ import SalidasPage from '../pages/SalidasPage';
 import EncargadosArea from '../pages/EncargadosArea';
 import NuevaSalida from '../pages/NuevaSalida';
 
+import NotaPedidoSemanal from '../pages/NotaPedidoSemanal';
+
 const AppRoutes = () => (
   <Router>
     <Navbar />
@@ -16,6 +18,7 @@ const AppRoutes = () => (
   <Route path="/salidas" element={<SalidasPage />} />
   <Route path="/nueva-salida" element={<NuevaSalida />} />
       <Route path="/encargados-area" element={<EncargadosArea />} />
+  <Route path="/nota-pedido-semanal" element={<NotaPedidoSemanal />} />
     </Routes>
   </Router>
 );

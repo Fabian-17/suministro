@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import NuevoRegistroForm from '../components/NuevoRegistroForm';
+import EditarRegistroForm from '../components/EditarRegistroForm';
 import { useNavigate } from 'react-router-dom';
 
 
@@ -13,6 +14,7 @@ const InventarioPage = () => {
   const [uploading, setUploading] = useState(false);
   const [uploadMsg, setUploadMsg] = useState(null);
   const fileInputRef = useRef();
+    const [editRegistro, setEditRegistro] = useState(null);
 
   const handleFileUpload = async (e) => {
     e.preventDefault();
@@ -86,6 +88,9 @@ const InventarioPage = () => {
         <button className="btn btn-success" onClick={() => navigate('/encargados-area')}>
           Encargados de área
         </button>
+        <button className="btn btn-dark" onClick={() => navigate('/nota-pedido-semanal')}>
+          Nota de Pedido Semanal
+        </button>
       </div>
 
       {/* Formulario para subir Excel */}
@@ -134,6 +139,7 @@ const InventarioPage = () => {
             <th style={{ border: '1px solid #ccc', padding: 8 }}>Artículo</th>
             <th style={{ border: '1px solid #ccc', padding: 8 }}>Código</th>
             <th style={{ border: '1px solid #ccc', padding: 8 }}>Cantidad</th>
+             <th style={{ border: '1px solid #ccc', padding: 8 }}>Editar</th>
           </tr>
         </thead>
         <tbody>
@@ -150,12 +156,43 @@ const InventarioPage = () => {
                   <td style={{ border: '1px solid #ccc', padding: 8 }}>{i.articulo}</td>
                   <td style={{ border: '1px solid #ccc', padding: 8 }}>{i.codigo}</td>
                   <td style={{ border: '1px solid #ccc', padding: 8, color: color, fontWeight: 'bold' }}>{i.cantidad}</td>
+                    <td style={{ border: '1px solid #ccc', padding: 8 }}>
+                      <button
+                        title="Editar"
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                        onClick={() => setEditRegistro(i)}
+                      >
+                        <span role="img" aria-label="editar" style={{ fontSize: 22 }}>✏️</span>
+                      </button>
+                    </td>
                 </tr>
               );
             })
           )}
         </tbody>
       </table>
+        {/* Modal para editar registro */}
+        {editRegistro && (
+          <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.3)', zIndex: 1000 }} onClick={() => setEditRegistro(null)}>
+            <div style={{ background: '#fff', padding: 32, borderRadius: 8, maxWidth: 500, margin: '60px auto', position: 'relative' }} onClick={e => e.stopPropagation()}>
+              <button style={{ position: 'absolute', top: 12, right: 12 }} onClick={() => setEditRegistro(null)}></button>
+              {/* Formulario de edición */}
+              <EditarRegistroForm
+                registro={editRegistro}
+                onSuccess={() => {
+                  fetch('http://suministros:3434/inventarios')
+                    .then(r => r.json())
+                    .then(data => {
+                      setInventario(data);
+                      setFiltered(data);
+                    });
+                  setEditRegistro(null);
+                }}
+                onCancel={() => setEditRegistro(null)}
+              />
+            </div>
+          </div>
+        )}
     </div>
   );
 };
