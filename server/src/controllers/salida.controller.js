@@ -64,7 +64,6 @@ export const obtenerSalidaPorFechaController = async (req, res) => {
     }
 };
 
-
 export const obtenerSalidasController = async (req, res) => {
     try {
         const salidas = await obtenerSalidas();
@@ -77,12 +76,15 @@ export const obtenerSalidasController = async (req, res) => {
     }
 };
 
-
+// ...existing code...
 export const uploadExcelSalidasController = async (req, res) => {
-  try {
-    if (!req.file) {
-      return res.status(400).json({ error: "No se subió ningún archivo" });
-    }
+    try {
+        if (!req.file) {
+            return res.status(400).json({ error: "No se subió ningún archivo" });
+        }
+
+        // Eliminar todas las salidas existentes
+        await Salida.destroy({ where: {}, truncate: true });
 
         const workbook = xlsx.read(req.file.buffer, { type: "buffer" });
         const sheetName = workbook.SheetNames.find(name => name.toUpperCase() === "DATOS");
@@ -91,9 +93,10 @@ export const uploadExcelSalidasController = async (req, res) => {
         }
 
         const sheet = workbook.Sheets[sheetName];
-        // Convertir la hoja a array de arrays
         const raw = xlsx.utils.sheet_to_json(sheet, { header: 1, defval: "" });
-        // Buscar la fila de títulos
+        if (!raw || raw.length === 0) {
+            return res.status(400).json({ error: "La hoja DATOS está vacía o no tiene filas." });
+        }
         let headerRowIdx = raw.findIndex(row =>
             row.some(cell => typeof cell === 'string' && cell.toLowerCase().includes('fecha')) &&
             row.some(cell => typeof cell === 'string' && cell.toLowerCase().includes('area')) &&
@@ -105,7 +108,6 @@ export const uploadExcelSalidasController = async (req, res) => {
             return res.status(400).json({ error: 'No se encontró la fila de títulos esperada.' });
         }
         const headers = raw[headerRowIdx];
-        // Mapear los índices de los campos
         const idxFecha = headers.findIndex(h => h && h.toString().toLowerCase().includes('fecha'));
         const idxArea = headers.findIndex(h => h && h.toString().toLowerCase().includes('area'));
         const idxDestino = headers.findIndex(h => h && h.toString().toLowerCase().includes('destino'));
@@ -115,45 +117,39 @@ export const uploadExcelSalidasController = async (req, res) => {
         let count = 0;
         for (let i = headerRowIdx + 1; i < raw.length; i++) {
             const row = raw[i];
-                let fecha = row[idxFecha];
-                const area = row[idxDestino];
-                const destinatario = row[idxArea];
-                const articulo = row[idxArticulo];
-                let cantidad = row[idxCantidad];
-                // Normalizar cantidad (puede venir como string tipo "4 mts")
-                if (typeof cantidad === "string") {
-                    const match = cantidad.match(/\d+/);
-                    cantidad = match ? parseInt(match[0], 10) : 0;
-                }
-                // Convertir fecha dd/mm/yyyy a ISO
-                if (typeof fecha === "string" && fecha.match(/^\d{1,2}\/\d{1,2}\/\d{4}$/)) {
-                    const [d, m, y] = fecha.split("/");
-                    fecha = `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
-                } else if (typeof fecha === "number" && !isNaN(fecha)) {
-                    // Excel serial date: days since 1899-12-30, leap year bug
-                    let days = fecha;
-                    if (days >= 60) days--;
-                    const excelEpoch = new Date(Date.UTC(1899, 11, 30));
-                    const dateObj = new Date(excelEpoch.getTime() + days * 24 * 60 * 60 * 1000);
-                    fecha = dateObj.toISOString().slice(0, 10);
-                }
-
-                // Relajar condición: solo requiere articulo, cantidad y fecha
-                if (!articulo || !cantidad || !fecha) continue;
-                await Salida.create({
-                    articulo,
-                    cantidad,
-                    fecha,
-                    area: area || "",
-                    destinatario: destinatario || "",
-                    codigo: "SIN-CODIGO",
-                    inventarioId: null
-                });
-                count++;
+            let fecha = row[idxFecha];
+            const area = row[idxDestino];
+            const destinatario = row[idxArea];
+            const articulo = row[idxArticulo];
+            let cantidad = row[idxCantidad];
+            if (typeof cantidad === "string") {
+                const match = cantidad.match(/\d+/);
+                cantidad = match ? parseInt(match[0], 10) : 0;
+            }
+            if (typeof fecha === "string" && fecha.match(/^\d{1,2}\/\d{1,2}\/\d{4}$/)) {
+                const [d, m, y] = fecha.split("/");
+                fecha = `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
+            } else if (typeof fecha === "number" && !isNaN(fecha)) {
+                let days = fecha;
+                if (days >= 60) days--;
+                const excelEpoch = new Date(Date.UTC(1899, 11, 30));
+                const dateObj = new Date(excelEpoch.getTime() + days * 24 * 60 * 60 * 1000);
+                fecha = dateObj.toISOString().slice(0, 10);
+            }
+            if (!articulo || !cantidad || !fecha) continue;
+            await Salida.create({
+                articulo,
+                cantidad,
+                fecha,
+                area: area || "",
+                destinatario: destinatario || "",
+                codigo: "SIN-CODIGO",
+                inventarioId: null
+            });
+            count++;
         }
-
         res.json({ message: "Archivo de salidas procesado correctamente", count });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
 };

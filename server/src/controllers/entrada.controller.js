@@ -7,11 +7,14 @@ import { Entrada } from "../models/entrada.js";
 
 export const uploadExcelEntradasController = async (req, res) => {
     try {
-        if (!req.file) {
-            return res.status(400).json({ error: "No se subió ningún archivo" });
-        }
+            if (!req.file) {
+                return res.status(400).json({ error: "No se subió ningún archivo" });
+            }
 
-        const workbook = xlsx.read(req.file.buffer, { type: "buffer" });
+            // Eliminar todas las entradas existentes
+            await Entrada.destroy({ where: {}, truncate: true });
+
+            const workbook = xlsx.read(req.file.buffer, { type: "buffer" });
             const sheetName = workbook.SheetNames.find(name => name.toUpperCase() === "ENTRADAS");
             if (!sheetName) {
                 return res.status(400).json({ error: "El archivo no contiene la hoja ENTRADAS" });

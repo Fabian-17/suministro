@@ -161,7 +161,7 @@ const NuevaSalida = () => {
           cantidad: Number(cantidad),
           area: areaId ? areas.find(a => a.id === Number(areaId)).nombre : '',
           destinatario: encargadoId ? encargados.find(e => e.id === Number(encargadoId)).nombre : '',
-          fecha: fecha ? new Date(fecha + 'T00:00:00').toISOString() : new Date().toISOString(),
+          fecha: fecha ? fecha : new Date().toISOString().slice(0, 10),
           codigo: producto ? producto.codigo : ''
         })
       });
