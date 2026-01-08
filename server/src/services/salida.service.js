@@ -66,17 +66,25 @@ export const obtenerSalidaPorArticulo = async (articulo) => {
 
 export const actualizarSalida = async (id, data) => {
     try {
-        const inventario = await Inventario.findOne({ where: { articulo: data.articulo } });
-        if (!inventario) {
-            throw new Error("Artículo no encontrado en inventario");
-        }
-        if (inventario.cantidad < data.cantidad) {
-            throw new Error("Cantidad insuficiente en inventario");
-        }
         const salida = await Salida.findByPk(id);
         if (!salida) {
             throw new Error("Salida no encontrada");
         }
+
+        const inventario = await Inventario.findOne({ where: { articulo: data.articulo } });
+        if (!inventario) {
+            throw new Error("Artículo no encontrado en inventario");
+        }
+
+        // Calcular la diferencia de cantidad
+        const diferenciaCantidad = data.cantidad - salida.cantidad;
+        
+        // Verificar si hay suficiente inventario para el incremento
+        if (diferenciaCantidad > 0 && inventario.cantidad < diferenciaCantidad) {
+            throw new Error("Cantidad insuficiente en inventario");
+        }
+
+        // Actualizar la salida
         const { articulo, cantidad, fecha, area, destinatario } = data;
         await salida.update({
             articulo,
@@ -85,7 +93,10 @@ export const actualizarSalida = async (id, data) => {
             area,
             destinatario
         });
-        await inventario.update({ cantidad: inventario.cantidad - data.cantidad });
+
+        // Ajustar el inventario (restar la diferencia)
+        await inventario.update({ cantidad: inventario.cantidad - diferenciaCantidad });
+        
         return salida;
     } catch (error) {
         throw new Error("Error al actualizar la salida: " + error.message);

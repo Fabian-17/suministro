@@ -17,7 +17,7 @@ const SalidasPage = () => {
   const [showForm, setShowForm] = useState(false);
 
   useEffect(() => {
-    fetch('http://suministros:3434/salidas')
+    fetch('http://localhost:3434/salidas')
       .then(r => r.json())
       .then(data => {
         // Ordenar por fecha descendente
@@ -29,21 +29,40 @@ const SalidasPage = () => {
 
   // Filtrar y agrupar salidas por mes, área y destinatario
   const getGroupedSalidas = () => {
-    if (!selectedMonth || !selectedYear) return [];
+    if (!selectedMonth || !selectedYear) return {};
     // Filtrar por mes/año
     const filtered = salidas.filter(s => {
       if (!s.fecha) return false;
       const date = new Date(s.fecha);
       return date.getMonth() + 1 === Number(selectedMonth) && date.getFullYear() === Number(selectedYear);
     });
-    // Agrupar por área y destinatario
+    // Agrupar por área y luego por destinatario
     const grupos = {};
     filtered.forEach(s => {
       const area = s.area || 'Sin área';
       const destinatario = s.destinatario || 'Sin destinatario';
+      
       if (!grupos[area]) grupos[area] = {};
       if (!grupos[area][destinatario]) grupos[area][destinatario] = [];
+      
       grupos[area][destinatario].push(s);
+    });
+    return grupos;
+  };
+
+  // Función para obtener salidas agrupadas solo por destinatario (para vista)
+  const getGroupedSalidasPorDestinatario = () => {
+    if (!selectedMonth || !selectedYear) return {};
+    const filtered = salidas.filter(s => {
+      if (!s.fecha) return false;
+      const date = new Date(s.fecha);
+      return date.getMonth() + 1 === Number(selectedMonth) && date.getFullYear() === Number(selectedYear);
+    });
+    const grupos = {};
+    filtered.forEach(s => {
+      const destinatario = s.destinatario || 'Sin destinatario';
+      if (!grupos[destinatario]) grupos[destinatario] = [];
+      grupos[destinatario].push(s);
     });
     return grupos;
   };
@@ -96,15 +115,15 @@ const SalidasPage = () => {
         </select>
       </div>
 
-      {/* Agrupado por área y destinatario */}
+      {/* Agrupado por destinatario */}
       {selectedMonth && selectedYear ? (
         <div style={{ marginTop: 24 }}>
           {(() => {
-            const grupos = getGroupedSalidas();
-            const areaKeys = Object.keys(grupos);
-            if (areaKeys.length === 0) return <div>No hay salidas para ese mes.</div>;
-            return areaKeys.map(area => (
-              <div key={area} style={{
+            const grupos = getGroupedSalidasPorDestinatario();
+            const destKeys = Object.keys(grupos);
+            if (destKeys.length === 0) return <div>No hay salidas para ese mes.</div>;
+            return destKeys.map(destinatario => (
+              <div key={destinatario} style={{
                 marginBottom: 40,
                 border: '1px solid #e0e0e0',
                 borderRadius: 10,
@@ -112,38 +131,27 @@ const SalidasPage = () => {
                 boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
                 padding: '24px 32px'
               }}>
-                <div style={{ fontSize: '1.25rem', fontWeight: 700, color: '#1976d2', marginBottom: 12, letterSpacing: 1 }}>{area}</div>
-                {Object.keys(grupos[area]).map(dest => (
-                  <div key={dest} style={{
-                    marginBottom: 24,
-                    borderLeft: '4px solid #1976d2',
-                    background: '#fff',
-                    borderRadius: 6,
-                    boxShadow: '0 1px 4px rgba(0,0,0,0.03)',
-                    padding: '16px 24px',
-                    marginLeft: 0
-                  }}>
-                    <div style={{ fontSize: '1.1rem', fontWeight: 600, color: '#333', marginBottom: 10, letterSpacing: 0.5 }}>{dest}</div>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '1rem', background: 'transparent' }}>
-                      <thead>
-                        <tr style={{ background: '#f0f4f8' }}>
-                          <th style={{ textAlign: 'left', padding: '6px 12px', fontWeight: 600, borderBottom: '1px solid #e0e0e0' }}>Fecha</th>
-                          <th style={{ textAlign: 'left', padding: '6px 12px', fontWeight: 600, borderBottom: '1px solid #e0e0e0' }}>Artículo</th>
-                          <th style={{ textAlign: 'right', padding: '6px 12px', fontWeight: 600, borderBottom: '1px solid #e0e0e0' }}>Cantidad</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {grupos[area][dest].map(salida => (
-                          <tr key={salida.id} style={{ borderBottom: '1px solid #f0f0f0' }}>
-                            <td style={{ padding: '6px 12px', color: '#222' }}>{salida.fecha ? formatFecha(salida.fecha) : ''}</td>
-                            <td style={{ padding: '6px 12px', color: '#222' }}>{salida.articulo}</td>
-                            <td style={{ padding: '6px 12px', textAlign: 'right', color: '#1976d2', fontWeight: 500 }}>{salida.cantidad}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                ))}
+                <div style={{ fontSize: '1.25rem', fontWeight: 700, color: '#1976d2', marginBottom: 12, letterSpacing: 1 }}>{destinatario}</div>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '1rem', background: 'transparent' }}>
+                  <thead>
+                    <tr style={{ background: '#f0f4f8' }}>
+                      <th style={{ textAlign: 'left', padding: '6px 12px', fontWeight: 600, borderBottom: '1px solid #e0e0e0' }}>Fecha</th>
+                      <th style={{ textAlign: 'left', padding: '6px 12px', fontWeight: 600, borderBottom: '1px solid #e0e0e0' }}>Artículo</th>
+                      <th style={{ textAlign: 'right', padding: '6px 12px', fontWeight: 600, borderBottom: '1px solid #e0e0e0' }}>Cantidad</th>
+                      <th style={{ textAlign: 'left', padding: '6px 12px', fontWeight: 600, borderBottom: '1px solid #e0e0e0' }}>Área</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {grupos[destinatario].map(salida => (
+                      <tr key={salida.id} style={{ borderBottom: '1px solid #f0f0f0' }}>
+                        <td style={{ padding: '6px 12px', color: '#222' }}>{salida.fecha ? formatFecha(salida.fecha) : ''}</td>
+                        <td style={{ padding: '6px 12px', color: '#222' }}>{salida.articulo}</td>
+                        <td style={{ padding: '6px 12px', textAlign: 'right', color: '#1976d2', fontWeight: 500 }}>{salida.cantidad}</td>
+                        <td style={{ padding: '6px 12px', color: '#444' }}>{salida.area}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             ));
           })()}

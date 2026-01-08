@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 
-const API = 'http://suministros:3434';
+const API = 'http://localhost:3434';
 
 const NuevaSalida = () => {
   const [inventario, setInventario] = useState([]);
@@ -32,7 +32,7 @@ const NuevaSalida = () => {
     formData.append('file', file);
     setUploading(true);
     try {
-      const res = await fetch('http://suministros:3434/salidas/upload', {
+      const res = await fetch('http://localhost:3434/salidas/upload', {
         method: 'POST',
         body: formData
       });
@@ -155,7 +155,7 @@ const NuevaSalida = () => {
           cantidad: Number(cantidad),
           area: areaId ? areas.find(a => a.id === Number(areaId)).nombre : '',
           destinatario: encargadoId ? encargados.find(e => e.id === Number(encargadoId)).nombre : '',
-          fecha: fecha ? new Date(fecha + 'T00:00:00').toISOString() : new Date().toISOString(),
+          fecha: fecha ? fecha : new Date().toISOString().slice(0, 10),
           codigo: producto ? producto.codigo : ''
         })
       });

@@ -25,7 +25,7 @@ const InventarioPage = () => {
     formData.append('file', file);
     setUploading(true);
     try {
-      const res = await fetch('http://suministros:3434/inventarios/upload', {
+      const res = await fetch('http://localhost:3434/inventarios/upload', {
         method: 'POST',
         body: formData
       });
@@ -33,7 +33,7 @@ const InventarioPage = () => {
       if (!res.ok) throw new Error(data.error || 'Error al subir archivo');
       setUploadMsg('Archivo procesado correctamente.');
       // Recargar inventario
-      fetch('http://suministros:3434/inventarios')
+      fetch('http://localhost:3434/inventarios')
         .then(r => r.json())
         .then(data => {
           setInventario(data);
@@ -48,7 +48,7 @@ const InventarioPage = () => {
   };
 
   useEffect(() => {
-    fetch('http://suministros:3434/inventarios')
+    fetch('http://localhost:3434/inventarios')
       .then(r => r.json())
       .then(data => {
         setInventario(data);
@@ -180,7 +180,7 @@ const InventarioPage = () => {
               <EditarRegistroForm
                 registro={editRegistro}
                 onSuccess={() => {
-                  fetch('http://suministros:3434/inventarios')
+                fetch('http://localhost:3434/inventarios')
                     .then(r => r.json())
                     .then(data => {
                       setInventario(data);

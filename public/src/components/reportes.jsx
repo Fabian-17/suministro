@@ -2,6 +2,17 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
 export const generarReportePDF = (grupos, mes, año) => {
+  // Validar que existan datos
+  if (!grupos || Object.keys(grupos).length === 0) {
+    alert('No hay datos para generar el reporte');
+    return;
+  }
+
+  if (!mes || !año) {
+    alert('Debe seleccionar mes y año');
+    return;
+  }
+
   const doc = new jsPDF();
   const destinatariosUnicos = new Set();
 

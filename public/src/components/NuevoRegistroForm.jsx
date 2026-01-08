@@ -18,7 +18,7 @@ const NuevoRegistroForm = ({ onSuccess }) => {
     try {
       // Convertir fecha a formato ISO (YYYY-MM-DDTHH:mm:ss.sssZ)
       const fechaISO = fecha ? new Date(fecha).toISOString() : null;
-      const res = await fetch('http://suministros:3434/entradas', {
+      const res = await fetch('http://localhost:3434/entradas', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ articulo, cantidad: Number(cantidad), codigo, fecha: fechaISO })

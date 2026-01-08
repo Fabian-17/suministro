@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CrearArea from '../components/CrearArea';
 
-const API = 'http://suministros:3434/encargados';
+const API = 'http://localhost:3434/encargados';
 
 const EncargadosArea = () => {
   const navigate = useNavigate();
@@ -25,7 +25,7 @@ const EncargadosArea = () => {
       .catch(() => setEncargados([]));
   };
   const fetchAreas = () => {
-    fetch('http://suministros:3434/areas')
+    fetch('http://localhost:3434/areas')
       .then(r => r.json())
       .then(setAreas)
       .catch(() => setAreas([]));
