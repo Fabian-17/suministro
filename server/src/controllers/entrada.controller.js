@@ -36,10 +36,15 @@ export const uploadExcelEntradasController = async (req, res) => {
                     const [d, m, y] = fecha.split("/");
                     fecha = `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
                 } else if (typeof fecha === "number" && !isNaN(fecha)) {
-                        let days = fecha;
-                        const excelEpoch = new Date(Date.UTC(1899, 11, 30));
-                        const dateObj = new Date(excelEpoch.getTime() + days * 24 * 60 * 60 * 1000);
-                        fecha = dateObj.toISOString().slice(0, 10);
+                        // Serial de Excel a fecha UTC sin problema de timezone
+                        let days = Math.floor(fecha);
+                        const excelEpochMs = Date.UTC(1899, 11, 30);
+                        const dateMs = excelEpochMs + days * 86400000;
+                        const dateObj = new Date(dateMs);
+                        const y = dateObj.getUTCFullYear();
+                        const m = String(dateObj.getUTCMonth() + 1).padStart(2, "0");
+                        const d = String(dateObj.getUTCDate()).padStart(2, "0");
+                        fecha = `${y}-${m}-${d}`;
                 }
                 if (!articulo || !cantidad || !fecha || !codigo) continue;
                 await Entrada.create({

@@ -7,6 +7,7 @@ export const API_ENDPOINTS = {
   salidas: `${API_URL}/salidas`,
   encargados: `${API_URL}/encargados`,
   areas: `${API_URL}/areas`,
+  notaPedido: `${API_URL}/nota-pedido`,
 };
 
 export default API_URL;

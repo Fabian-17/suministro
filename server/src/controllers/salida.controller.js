@@ -167,7 +167,7 @@ export const uploadExcelSalidasController = async (req, res) => {
         cantidad = match ? parseInt(match[0], 10) : 0;
       }
 
-      // 🔹 PARSEO SEGURO DE FECHA A STRING YYYY-MM-DD
+      // Parseo de fecha a string YYYY-MM-DD sin problema de timezone
       let parsedFecha = null;
 
       if (
@@ -178,22 +178,20 @@ export const uploadExcelSalidasController = async (req, res) => {
         const [d, m, y] = rawFecha.split("/");
         parsedFecha = `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
       } else if (typeof rawFecha === "number" && !isNaN(rawFecha)) {
-        // serial de Excel
-    let days = Math.floor(rawFecha);
-    const excelEpochMs = Date.UTC(1899, 11, 30);
-    const dateMs = excelEpochMs + days * 86400000;
-    const dateObj = new Date(dateMs);
-
-        // ⚠️ Solo partes UTC → string
+        // Serial de Excel a fecha UTC
+        let days = Math.floor(rawFecha);
+        const excelEpochMs = Date.UTC(1899, 11, 30);
+        const dateMs = excelEpochMs + days * 86400000;
+        const dateObj = new Date(dateMs);
         const y = dateObj.getUTCFullYear();
         const m = String(dateObj.getUTCMonth() + 1).padStart(2, "0");
         const d = String(dateObj.getUTCDate()).padStart(2, "0");
         parsedFecha = `${y}-${m}-${d}`;
       } else if (rawFecha instanceof Date) {
-        // si XLSX ya devolvió un Date
-        const y = rawFecha.getFullYear();
-        const m = String(rawFecha.getMonth() + 1).padStart(2, "0");
-        const d = String(rawFecha.getDate()).padStart(2, "0");
+        // Si XLSX devolvió Date, usar UTC para evitar timezone
+        const y = rawFecha.getUTCFullYear();
+        const m = String(rawFecha.getUTCMonth() + 1).padStart(2, "0");
+        const d = String(rawFecha.getUTCDate()).padStart(2, "0");
         parsedFecha = `${y}-${m}-${d}`;
       }
 
