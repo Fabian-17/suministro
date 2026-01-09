@@ -4,6 +4,7 @@ import EditarRegistroForm from '../components/EditarRegistroForm';
 import { useNavigate } from 'react-router-dom';
 import { useInventario } from '../hooks/useInventario.js';
 import { useToast } from '../context/ToastContext.jsx';
+import API_URL from '../config/api';
 
 
 const InventarioPage = () => {
@@ -16,6 +17,22 @@ const InventarioPage = () => {
   const fileInputRef = useRef();
   const [editRegistro, setEditRegistro] = useState(null);
   const { showToast } = useToast();
+  
+  // Estado para alternar entre formulario de entrada y salida
+  const [formularioActivo, setFormularioActivo] = useState('entrada'); // 'entrada' o 'salida'
+  
+  // Estados para formulario de salida
+  const [areas, setAreas] = useState([]);
+  const [encargados, setEncargados] = useState([]);
+  const [filteredEncargados, setFilteredEncargados] = useState([]);
+  const [filteredAreas, setFilteredAreas] = useState([]);
+  const [salidaForm, setSalidaForm] = useState({
+    productoId: '',
+    cantidad: '',
+    fecha: new Date().toISOString().slice(0, 10),
+    encargadoId: '',
+    areaId: ''
+  });
 
   const handleFileUpload = async (e) => {
     e.preventDefault();
@@ -36,6 +53,93 @@ const InventarioPage = () => {
     }
   };
 
+  // Cargar áreas y encargados para formulario de salida
+  useEffect(() => {
+    fetch(`${API_URL}/areas`)
+      .then(r => r.json())
+      .then(data => setAreas(Array.isArray(data) ? data : []));
+    
+    fetch(`${API_URL}/encargados`)
+      .then(r => r.json())
+      .then(data => setEncargados(Array.isArray(data) ? data : []));
+  }, []);
+
+  // Filtrar encargados por área seleccionada
+  useEffect(() => {
+    if (salidaForm.areaId) {
+      fetch(`${API_URL}/encargados/area/${salidaForm.areaId}`)
+        .then(r => r.json())
+        .then(data => setFilteredEncargados(Array.isArray(data) ? data : []))
+        .catch(() => setFilteredEncargados([]));
+    } else {
+      setFilteredEncargados([]);
+    }
+  }, [salidaForm.areaId]);
+
+  // Filtrar áreas por encargado seleccionado
+  useEffect(() => {
+    if (salidaForm.encargadoId) {
+      fetch(`${API_URL}/encargados/encargado/${salidaForm.encargadoId}`)
+        .then(r => r.json())
+        .then(data => setFilteredAreas(Array.isArray(data) ? data : []))
+        .catch(() => setFilteredAreas([]));
+    } else {
+      setFilteredAreas([]);
+    }
+  }, [salidaForm.encargadoId]);
+
+  // Obtener opciones de áreas (filtradas o todas)
+  const getAreaOptions = () => {
+    if (salidaForm.encargadoId && filteredAreas.length > 0) {
+      return filteredAreas;
+    }
+    return areas;
+  };
+
+  // Obtener opciones de encargados (filtrados o todos)
+  const getEncargadoOptions = () => {
+    if (salidaForm.areaId && filteredEncargados.length > 0) {
+      return filteredEncargados;
+    }
+    return encargados;
+  };
+
+  // Manejar submit de salida
+  const handleSalidaSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const producto = inventario.find(i => String(i.id) === String(salidaForm.productoId));
+      const area = areas.find(a => a.id === Number(salidaForm.areaId));
+      const encargado = encargados.find(e => e.id === Number(salidaForm.encargadoId));
+      
+      const res = await fetch(`${API_URL}/salidas`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          articulo: producto ? producto.articulo : '',
+          codigo: producto ? producto.codigo : '',
+          cantidad: Number(salidaForm.cantidad),
+          area: area ? area.nombre : '',
+          destinatario: encargado ? encargado.nombre : '',
+          fecha: salidaForm.fecha
+        })
+      });
+      if (!res.ok) throw new Error('Error al registrar salida');
+      showToast('Salida registrada correctamente', 'success');
+      setSalidaForm({
+        productoId: '',
+        cantidad: '',
+        fecha: new Date().toISOString().slice(0, 10),
+        encargadoId: '',
+        areaId: ''
+      });
+      refresh();
+    } catch (err) {
+      showToast(err.message, 'error');
+    }
+  };
+
+  // Filtrar inventario
   useEffect(() => {
     if (!search) {
       setFiltered(inventario);
@@ -64,18 +168,34 @@ const InventarioPage = () => {
         boxShadow: '0 2px 8px rgba(0,0,0,0.06)'
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
-          <h2 style={{ margin: 0, color: '#1976d2' }}>Inventario</h2>
+          <h2 style={{ margin: 0, color: '#1976d2' }}>Inventario General</h2>
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-            <button className="btn btn-warning" onClick={() => navigate('/salidas')}>
-              Salidas
+            <button 
+              className="btn btn-info" 
+              onClick={() => navigate('/entradas')}
+              style={{ fontSize: '0.9rem' }}
+            >
+              Ver Historial Entradas
             </button>
-            <button className="btn btn-info" onClick={() => navigate('/entradas')}>
-              Entradas
+            <button 
+              className="btn btn-warning" 
+              onClick={() => navigate('/salidas')}
+              style={{ fontSize: '0.9rem' }}
+            >
+              Ver Historial Salidas
             </button>
-            <button className="btn btn-success" onClick={() => navigate('/encargados-area')}>
+            <button 
+              className="btn btn-success" 
+              onClick={() => navigate('/encargados-area')}
+              style={{ fontSize: '0.9rem' }}
+            >
               Encargados
             </button>
-            <button className="btn btn-secondary" onClick={() => navigate('/nota-pedido-semanal')}>
+            <button 
+              className="btn btn-secondary" 
+              onClick={() => navigate('/nota-pedido-semanal')}
+              style={{ fontSize: '0.9rem' }}
+            >
               Nota Pedido
             </button>
           </div>
@@ -85,11 +205,11 @@ const InventarioPage = () => {
       {/* Layout de dos columnas */}
       <div style={{ 
         display: 'grid', 
-        gridTemplateColumns: '400px 1fr',
+        gridTemplateColumns: '420px 1fr',
         gap: 20,
         alignItems: 'start'
       }}>
-        {/* COLUMNA IZQUIERDA - Formulario de Nueva Entrada */}
+        {/* COLUMNA IZQUIERDA - Formulario fijo */}
         <div style={{ 
           background: '#fff', 
           borderRadius: 12, 
@@ -98,72 +218,203 @@ const InventarioPage = () => {
           position: 'sticky',
           top: 20
         }}>
-          <h3 style={{ 
-            marginTop: 0, 
-            marginBottom: 20, 
-            color: '#1976d2',
-            fontSize: '1.2rem',
-            borderBottom: '2px solid #e0e0e0',
-            paddingBottom: 12
-          }}>
-            ➕ Nueva Entrada
-          </h3>
-          <NuevoRegistroForm onSuccess={() => {
-            refresh();
-            showToast('Entrada registrada correctamente', 'success');
-          }} />
-
-          {/* Formulario para subir Excel */}
+          {/* Tabs para alternar entre Entrada y Salida */}
           <div style={{ 
-            marginTop: 32, 
-            paddingTop: 24, 
-            borderTop: '1px solid #e0e0e0' 
+            display: 'flex', 
+            gap: 8, 
+            marginBottom: 20,
+            borderBottom: '2px solid #e0e0e0'
           }}>
-            <h4 style={{ 
-              marginTop: 0, 
-              marginBottom: 16, 
-              fontSize: '1rem',
-              color: '#555'
-            }}>
-              📄 Importar desde Excel
-            </h4>
-            <form onSubmit={handleFileUpload}>
-              <input 
-                type="file" 
-                accept=".xls,.xlsx,.xlsm" 
-                ref={fileInputRef} 
-                disabled={uploading}
-                style={{ 
-                  width: '100%',
-                  marginBottom: 12,
-                  padding: 8,
-                  border: '1px solid #ccc',
-                  borderRadius: 6,
-                  fontSize: '0.9rem'
-                }}
-              />
-              <button 
-                type="submit" 
-                className="btn btn-primary" 
-                disabled={uploading}
-                style={{ width: '100%' }}
-              >
-                {uploading ? '⏳ Subiendo...' : '📤 Subir Excel'}
-              </button>
-              {uploadMsg && (
-                <div style={{ 
-                  marginTop: 12, 
-                  padding: '8px 12px',
-                  borderRadius: 6,
-                  fontSize: '0.85rem',
-                  background: uploadMsg.includes('correctamente') ? '#e8f5e9' : '#ffebee',
-                  color: uploadMsg.includes('correctamente') ? '#2e7d32' : '#c62828'
-                }}>
-                  {uploadMsg}
-                </div>
-              )}
-            </form>
+            <button
+              onClick={() => setFormularioActivo('entrada')}
+              style={{
+                flex: 1,
+                padding: '12px',
+                border: 'none',
+                background: formularioActivo === 'entrada' ? '#1976d2' : 'transparent',
+                color: formularioActivo === 'entrada' ? '#fff' : '#666',
+                fontWeight: 600,
+                cursor: 'pointer',
+                borderRadius: '8px 8px 0 0',
+                transition: 'all 0.2s'
+              }}
+            >
+              Entrada
+            </button>
+            <button
+              onClick={() => setFormularioActivo('salida')}
+              style={{
+                flex: 1,
+                padding: '12px',
+                border: 'none',
+                background: formularioActivo === 'salida' ? '#ff9800' : 'transparent',
+                color: formularioActivo === 'salida' ? '#fff' : '#666',
+                fontWeight: 600,
+                cursor: 'pointer',
+                borderRadius: '8px 8px 0 0',
+                transition: 'all 0.2s'
+              }}
+            >
+              Salida
+            </button>
           </div>
+
+          {/* Formulario de Entrada */}
+          {formularioActivo === 'entrada' && (
+            <>
+              <h3 style={{ 
+                marginTop: 0, 
+                marginBottom: 20, 
+                color: '#1976d2',
+                fontSize: '1.2rem'
+              }}>
+                ➕ Nueva Entrada
+              </h3>
+              <NuevoRegistroForm onSuccess={() => {
+                refresh();
+                showToast('Entrada registrada correctamente', 'success');
+              }} />
+
+              {/* Formulario para subir Excel */}
+              <div style={{ 
+                marginTop: 32, 
+                paddingTop: 24, 
+                borderTop: '1px solid #e0e0e0' 
+              }}>
+                <h4 style={{ 
+                  marginTop: 0, 
+                  marginBottom: 16, 
+                  fontSize: '1rem',
+                  color: '#555'
+                }}>
+                  📄 Importar desde Excel
+                </h4>
+                <form onSubmit={handleFileUpload}>
+                  <input 
+                    type="file" 
+                    accept=".xls,.xlsx,.xlsm" 
+                    ref={fileInputRef} 
+                    disabled={uploading}
+                    style={{ 
+                      width: '100%',
+                      marginBottom: 12,
+                      padding: 8,
+                      border: '1px solid #ccc',
+                      borderRadius: 6,
+                      fontSize: '0.9rem'
+                    }}
+                  />
+                  <button 
+                    type="submit" 
+                    className="btn btn-primary" 
+                    disabled={uploading}
+                    style={{ width: '100%' }}
+                  >
+                    {uploading ? '⏳ Subiendo...' : '📤 Subir Excel'}
+                  </button>
+                  {uploadMsg && (
+                    <div style={{ 
+                      marginTop: 12, 
+                      padding: '8px 12px',
+                      borderRadius: 6,
+                      fontSize: '0.85rem',
+                      background: uploadMsg.includes('correctamente') ? '#e8f5e9' : '#ffebee',
+                      color: uploadMsg.includes('correctamente') ? '#2e7d32' : '#c62828'
+                    }}>
+                      {uploadMsg}
+                    </div>
+                  )}
+                </form>
+              </div>
+            </>
+          )}
+
+          {/* Formulario de Salida */}
+          {formularioActivo === 'salida' && (
+            <>
+              <h3 style={{ 
+                marginTop: 0, 
+                marginBottom: 20, 
+                color: '#ff9800',
+                fontSize: '1.2rem'
+              }}>
+                ➕ Nueva Salida
+              </h3>
+              <form onSubmit={handleSalidaSubmit}>
+                <div style={{ marginBottom: 16 }}>
+                  <label style={{ display: 'block', marginBottom: 6, fontWeight: 500, fontSize: '0.9rem' }}>Producto *</label>
+                  <select
+                    required
+                    value={salidaForm.productoId}
+                    onChange={e => setSalidaForm({...salidaForm, productoId: e.target.value})}
+                    style={{ width: '100%', padding: '8px 12px', border: '1px solid #ccc', borderRadius: 6, fontSize: '0.95rem' }}
+                  >
+                    <option value="">Selecciona un producto</option>
+                    {inventario.map(i => (
+                      <option key={i.id} value={i.id}>{i.articulo} (Stock: {i.cantidad})</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div style={{ marginBottom: 16 }}>
+                  <label style={{ display: 'block', marginBottom: 6, fontWeight: 500, fontSize: '0.9rem' }}>Cantidad *</label>
+                  <input
+                    type="number"
+                    required
+                    min="1"
+                    value={salidaForm.cantidad}
+                    onChange={e => setSalidaForm({...salidaForm, cantidad: e.target.value})}
+                    style={{ width: '93%', padding: '8px 12px', border: '1px solid #ccc', borderRadius: 6, fontSize: '0.95rem' }}
+                  />
+                </div>
+
+                <div style={{ marginBottom: 16 }}>
+                  <label style={{ display: 'block', marginBottom: 6, fontWeight: 500, fontSize: '0.9rem' }}>Fecha *</label>
+                  <input
+                    type="date"
+                    required
+                    value={salidaForm.fecha}
+                    onChange={e => setSalidaForm({...salidaForm, fecha: e.target.value})}
+                    style={{ width: '93%', padding: '8px 12px', border: '1px solid #ccc', borderRadius: 6, fontSize: '0.95rem' }}
+                  />
+                </div>
+
+                <div style={{ marginBottom: 16 }}>
+                  <label style={{ display: 'block', marginBottom: 6, fontWeight: 500, fontSize: '0.9rem' }}>Área *</label>
+                  <select
+                    required
+                    value={salidaForm.areaId}
+                    onChange={e => setSalidaForm({...salidaForm, areaId: e.target.value, encargadoId: ''})}
+                    style={{ width: '100%', padding: '8px 12px', border: '1px solid #ccc', borderRadius: 6, fontSize: '0.95rem' }}
+                  >
+                    <option value="">Seleccionar área</option>
+                    {getAreaOptions().map(area => (
+                      <option key={area.id} value={area.id}>{area.nombre}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div style={{ marginBottom: 20 }}>
+                  <label style={{ display: 'block', marginBottom: 6, fontWeight: 500, fontSize: '0.9rem' }}>Destinatario (Encargado) *</label>
+                  <select
+                    required
+                    value={salidaForm.encargadoId}
+                    onChange={e => setSalidaForm({...salidaForm, encargadoId: e.target.value})}
+                    style={{ width: '100%', padding: '8px 12px', border: '1px solid #ccc', borderRadius: 6, fontSize: '0.95rem' }}
+                  >
+                    <option value="">Seleccionar encargado</option>
+                    {getEncargadoOptions().map(enc => (
+                      <option key={enc.id} value={enc.id}>{enc.nombre}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <button type="submit" className="btn btn-warning" style={{ width: '100%', padding: '10px', fontSize: '1rem', fontWeight: 600 }}>
+                  📤 Registrar Salida
+                </button>
+              </form>
+            </>
+          )}
         </div>
 
         {/* COLUMNA DERECHA - Inventario */}
