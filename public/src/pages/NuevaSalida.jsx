@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useToast } from '../context/ToastContext.jsx';
+import API_URL from '../config/api';
 
-const API = 'http://localhost:3434';
+const API = API_URL;
 
 // Función para obtener fecha local en formato YYYY-MM-DD
 const formatLocalDate = () => {

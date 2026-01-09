@@ -43,7 +43,7 @@ const EntradasPage = () => {
   };
 
   useEffect(() => {
-    fetch('http://localhost:3434/entradas')
+    fetch(`${API_URL}/entradas`)
       .then(r => r.json())
       .then(data => {
         setEntradas(data);
