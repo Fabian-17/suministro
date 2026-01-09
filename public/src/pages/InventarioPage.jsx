@@ -26,20 +26,9 @@ const InventarioPage = () => {
     if (!file) return setUploadMsg('Selecciona un archivo primero.');
     setUploading(true);
     try {
-      const res = await fetch('http://localhost:3434/inventarios/upload', {
-        method: 'POST',
-        body: formData
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Error al subir archivo');
+      await uploadExcel(file);
       setUploadMsg('Archivo procesado correctamente.');
-      // Recargar inventario
-      fetch('http://localhost:3434/inventarios')
-        .then(r => r.json())
-        .then(data => {
-          setInventario(data);
-          setFiltered(data);
-        });
+      showToast('Archivo procesado correctamente.', 'success');
     } catch (err) {
       setUploadMsg(err.message);
       showToast(err.message, 'error');
@@ -48,19 +37,6 @@ const InventarioPage = () => {
       if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
-
-  useEffect(() => {
-    fetch('http://localhost:3434/inventarios')
-      .then(r => r.json())
-      .then(data => {
-        setInventario(data);
-        setFiltered(data);
-      })
-      .catch(() => {
-        setInventario([]);
-        setFiltered([]);
-      });
-  }, []);
 
   useEffect(() => {
     if (!search) {
@@ -185,13 +161,9 @@ const InventarioPage = () => {
               <EditarRegistroForm
                 registro={editRegistro}
                 onSuccess={() => {
-                fetch('http://localhost:3434/inventarios')
-                    .then(r => r.json())
-                    .then(data => {
-                      setInventario(data);
-                      setFiltered(data);
-                    });
+                  refresh();
                   setEditRegistro(null);
+                  showToast('Registro actualizado correctamente', 'success');
                 }}
                 onCancel={() => setEditRegistro(null)}
               />
