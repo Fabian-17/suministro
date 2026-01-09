@@ -20,7 +20,7 @@ const EntradasPage = () => {
     formData.append('file', file);
     setUploading(true);
     try {
-      const res = await fetch('http://localhost:3434/entradas/upload', {
+      const res = await fetch(`${API_URL}/entradas/upload`, {
         method: 'POST',
         body: formData
       });
@@ -28,7 +28,7 @@ const EntradasPage = () => {
       if (!res.ok) throw new Error(data.error || 'Error al subir archivo');
       setUploadMsg('Archivo procesado correctamente.');
       // Recargar entradas
-      fetch('http://localhost:3434/entradas')
+      fetch(`${API_URL}/entradas`)
         .then(r => r.json())
         .then(data => {
           setEntradas(data);

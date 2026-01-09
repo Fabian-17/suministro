@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
-const API = 'http://localhost:3434';
+import API_URL from '../config/api';
+const API = API_URL;
 export function useInventario(){
   const [inventario,setInventario]=useState([]);
   const [loading,setLoading]=useState(false);

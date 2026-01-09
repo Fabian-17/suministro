@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import NuevaSalida from './NuevaSalida';
 import { generarReportePDF } from '../components/reportes';
 import { useToast } from '../context/ToastContext.jsx';
+import API_URL from '../config/api';
 
 const SalidasPage = () => {
   const navigate = useNavigate();
@@ -26,7 +27,7 @@ const SalidasPage = () => {
   // Cargar años disponibles cuando se abre el historial
   const cargarYearsDisponibles = async () => {
     try {
-      const res = await fetch('http://localhost:3434/salidas');
+      const res = await fetch(`${API_URL}/salidas`);
       const data = await res.json();
       const years = [...new Set(data.map(s => s.fecha ? new Date(s.fecha).getFullYear() : null).filter(Boolean))];
       setYearsAvailable(years.sort((a, b) => b - a));
@@ -44,7 +45,7 @@ const SalidasPage = () => {
     
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:3434/salidas');
+      const res = await fetch(`${API_URL}/salidas`);
       const data = await res.json();
       
       // Filtrar por mes/año

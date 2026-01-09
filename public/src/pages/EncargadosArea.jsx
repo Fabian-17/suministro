@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useToast } from '../context/ToastContext';
 import { useNavigate } from 'react-router-dom';
+import API_URL from '../config/api';
 
-const API = 'http://localhost:3434/encargados';
+const API = `${API_URL}/encargados`;
 
 const EncargadosArea = () => {
   const { showToast } = useToast();
@@ -38,7 +39,7 @@ const EncargadosArea = () => {
 
   const fetchAreas = async () => {
     try {
-      const res = await fetch('http://localhost:3434/areas');
+      const res = await fetch(`${API_URL}/areas`);
       const data = await res.json();
       setAreas(data);
       setFilteredAreas(data);
@@ -122,7 +123,7 @@ const EncargadosArea = () => {
     
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:3434/areas', {
+      const res = await fetch(`${API_URL}/areas`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ nombre: nombreArea })

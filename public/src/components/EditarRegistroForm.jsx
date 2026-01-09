@@ -14,7 +14,7 @@ const EditarRegistroForm = ({ registro, onSuccess, onCancel }) => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`http://localhost:3434/inventarios/${registro.id}`, {
+      const res = await fetch(`${API_URL}/inventarios/${registro.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ articulo, cantidad: Number(cantidad), codigo })

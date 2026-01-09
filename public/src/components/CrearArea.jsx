@@ -10,7 +10,7 @@ const CrearArea = ({ onCreate }) => {
     setError(null);
     setSuccess(null);
     try {
-      const res = await fetch('http://localhost:3434/areas', {
+      const res = await fetch(`${API_URL}/areas`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ nombre })

@@ -40,7 +40,7 @@ const NuevaSalida = () => {
   formData.append('file', file);
     setUploading(true);
     try {
-      const res = await fetch('http://localhost:3434/salidas/upload', {
+      const res = await fetch(`${API}/salidas/upload`, {
         method: 'POST',
         body: formData
       });

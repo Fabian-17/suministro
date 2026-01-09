@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { useToast } from '../context/ToastContext';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import API_URL from '../config/api';
 
-const API = 'http://localhost:3434/nota-pedido';
+const API = `${API_URL}/nota-pedido`;
 
 export default function NotaPedidoSemanal() {
   const [articulo, setArticulo] = useState("");
