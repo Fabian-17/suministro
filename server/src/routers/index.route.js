@@ -4,6 +4,7 @@ import SalidaRoute from "./salida.route.js";
 import InventarioRoute from "./inventario.route.js";
 import EncargadosRoute from "./encargados.route.js";
 import AreasRoute from "./areas.route.js";
+import NotaPedidoRoute from "./notaPedido.route.js";
 
 const router = Router();
 
@@ -12,5 +13,6 @@ router.use("/salidas", SalidaRoute);
 router.use("/inventarios", InventarioRoute);
 router.use("/encargados", EncargadosRoute);
 router.use("/areas", AreasRoute);
+router.use("/nota-pedido", NotaPedidoRoute);
 
 export default router;
