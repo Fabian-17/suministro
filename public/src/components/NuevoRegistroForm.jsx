@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import API_URL from '../config/api';
 import { useToast } from '../context/ToastContext.jsx';
+import ProductoAutocomplete from './ProductoAutocomplete.jsx';
 
 
 const NuevoRegistroForm = ({ onSuccess }) => {
@@ -13,6 +14,16 @@ const NuevoRegistroForm = ({ onSuccess }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const { showToast } = useToast();
+
+  const handleProductoChange = (product) => {
+    if (product) {
+      setArticulo(product.articulo || '');
+      // Si el producto viene de la BD, autocompletar el código
+      if (product.codigo) {
+        setCodigo(product.codigo);
+      }
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -43,13 +54,17 @@ const NuevoRegistroForm = ({ onSuccess }) => {
 
   return (
   <form className="nuevo-registro-form" onSubmit={handleSubmit} style={{ display:'flex', flexDirection:'column', gap:'1rem', marginTop:'.5rem' }}>
-      <input
-        type="text"
-        placeholder="Artículo"
-        value={articulo}
-        onChange={e => setArticulo(e.target.value)}
-        required
-      />
+      <div>
+        <label style={{ display: 'block', marginBottom: 6, fontWeight: 500, fontSize: '0.9rem' }}>Artículo *</label>
+        <ProductoAutocomplete
+          value={articulo}
+          onChange={handleProductoChange}
+          required
+          validateExists={false}
+          placeholder="Buscar o escribir artículo..."
+          showStock={false}
+        />
+      </div>
       <input
         type="number"
         placeholder="Cantidad"

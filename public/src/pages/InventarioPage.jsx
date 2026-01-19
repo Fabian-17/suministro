@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import NuevoRegistroForm from '../components/NuevoRegistroForm';
 import EditarRegistroForm from '../components/EditarRegistroForm';
+import ProductoAutocomplete from '../components/ProductoAutocomplete';
 import { useNavigate } from 'react-router-dom';
 import { useInventario } from '../hooks/useInventario.js';
 import { useToast } from '../context/ToastContext.jsx';
@@ -35,6 +36,7 @@ const InventarioPage = () => {
     encargadoId: '',
     areaId: ''
   });
+  const [selectedProductoSalida, setSelectedProductoSalida] = useState(null);
 
   const handleFileUpload = async (e) => {
     e.preventDefault();
@@ -109,8 +111,14 @@ const InventarioPage = () => {
   // Manejar submit de salida
   const handleSalidaSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validar que se haya seleccionado un producto
+    if (!selectedProductoSalida) {
+      showToast('Debes seleccionar un producto válido', 'error');
+      return;
+    }
+    
     try {
-      const producto = inventario.find(i => String(i.id) === String(salidaForm.productoId));
       const area = areas.find(a => a.id === Number(salidaForm.areaId));
       const encargado = encargados.find(e => e.id === Number(salidaForm.encargadoId));
       
@@ -118,8 +126,8 @@ const InventarioPage = () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          articulo: producto ? producto.articulo : '',
-          codigo: producto ? producto.codigo : '',
+          articulo: selectedProductoSalida.articulo,
+          codigo: selectedProductoSalida.codigo,
           cantidad: Number(salidaForm.cantidad),
           area: area ? area.nombre : '',
           destinatario: encargado ? encargado.nombre : '',
@@ -135,6 +143,7 @@ const InventarioPage = () => {
         encargadoId: '',
         areaId: ''
       });
+      setSelectedProductoSalida(null);
       refresh();
     } catch (err) {
       showToast(err.message, 'error');
@@ -382,17 +391,29 @@ const InventarioPage = () => {
               <form onSubmit={handleSalidaSubmit}>
                 <div style={{ marginBottom: 16 }}>
                   <label style={{ display: 'block', marginBottom: 6, fontWeight: 500, fontSize: '0.9rem' }}>Producto *</label>
-                  <select
+                  <ProductoAutocomplete
+                    value={selectedProductoSalida ? selectedProductoSalida.articulo : ''}
+                    onChange={(product) => {
+                      setSelectedProductoSalida(product);
+                      setSalidaForm({...salidaForm, productoId: product?.id || ''});
+                    }}
                     required
-                    value={salidaForm.productoId}
-                    onChange={e => setSalidaForm({...salidaForm, productoId: e.target.value})}
-                    style={{ width: '100%', padding: '8px 12px', border: '1px solid #ccc', borderRadius: 6, fontSize: '0.95rem' }}
-                  >
-                    <option value="">Selecciona un producto</option>
-                    {inventario.map(i => (
-                      <option key={i.id} value={i.id}>{i.articulo} (Stock: {i.cantidad})</option>
-                    ))}
-                  </select>
+                    validateExists={true}
+                    placeholder="Buscar producto en inventario..."
+                    showStock={true}
+                  />
+                  {selectedProductoSalida && (
+                    <div style={{ 
+                      marginTop: 8, 
+                      padding: '8px 12px', 
+                      background: '#e8f5e9', 
+                      borderRadius: 4,
+                      fontSize: '0.85rem',
+                      color: '#2e7d32'
+                    }}>
+                      ✓ Stock disponible: {selectedProductoSalida.cantidad} unidades
+                    </div>
+                  )}
                 </div>
 
                 <div style={{ marginBottom: 16 }}>
@@ -401,10 +422,17 @@ const InventarioPage = () => {
                     type="number"
                     required
                     min="1"
+                    max={selectedProductoSalida ? selectedProductoSalida.cantidad : undefined}
                     value={salidaForm.cantidad}
                     onChange={e => setSalidaForm({...salidaForm, cantidad: e.target.value})}
                     style={{ width: '93%', padding: '8px 12px', border: '1px solid #ccc', borderRadius: 6, fontSize: '0.95rem' }}
+                    disabled={!selectedProductoSalida}
                   />
+                  {selectedProductoSalida && salidaForm.cantidad && Number(salidaForm.cantidad) > selectedProductoSalida.cantidad && (
+                    <div style={{ fontSize: '0.8rem', color: '#ff5252', marginTop: 4 }}>
+                      La cantidad supera el stock disponible ({selectedProductoSalida.cantidad})
+                    </div>
+                  )}
                 </div>
 
                 <div style={{ marginBottom: 16 }}>
