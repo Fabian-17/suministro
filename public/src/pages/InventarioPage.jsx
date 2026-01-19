@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import NuevoRegistroForm from '../components/NuevoRegistroForm';
 import EditarRegistroForm from '../components/EditarRegistroForm';
 import ProductoAutocomplete from '../components/ProductoAutocomplete';
+import EncargadoAutocomplete from '../components/EncargadoAutocomplete';
 import { useNavigate } from 'react-router-dom';
 import { useInventario } from '../hooks/useInventario.js';
 import { useToast } from '../context/ToastContext.jsx';
@@ -34,9 +35,11 @@ const InventarioPage = () => {
     cantidad: '',
     fecha: new Date().toISOString().slice(0, 10),
     encargadoId: '',
+    encargadoNombre: '',
     areaId: ''
   });
   const [selectedProductoSalida, setSelectedProductoSalida] = useState(null);
+  const [selectedEncargado, setSelectedEncargado] = useState(null);
 
   const handleFileUpload = async (e) => {
     e.preventDefault();
@@ -117,10 +120,41 @@ const InventarioPage = () => {
       showToast('Debes seleccionar un producto válido', 'error');
       return;
     }
+
+    // Validar que se haya ingresado un encargado
+    if (!selectedEncargado || !selectedEncargado.nombre || selectedEncargado.nombre.trim().length === 0) {
+      showToast('Debes ingresar un encargado/destinatario', 'error');
+      return;
+    }
     
     try {
       const area = areas.find(a => a.id === Number(salidaForm.areaId));
-      const encargado = encargados.find(e => e.id === Number(salidaForm.encargadoId));
+      let encargadoNombre = selectedEncargado.nombre;
+      let encargadoId = selectedEncargado.id;
+
+      // Si es un encargado nuevo (no tiene ID), crearlo en el backend
+      if (selectedEncargado.isNew && !selectedEncargado.id) {
+        try {
+          const createEncargadoRes = await fetch(`${API_URL}/encargados`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+              nombre: selectedEncargado.nombre.trim(),
+              areaIds: salidaForm.areaId ? [Number(salidaForm.areaId)] : []
+            })
+          });
+          
+          if (createEncargadoRes.ok) {
+            const newEncargado = await createEncargadoRes.json();
+            encargadoId = newEncargado.id;
+            // Actualizar lista de encargados
+            setEncargados(prev => [...prev, newEncargado]);
+            showToast(`Encargado "${selectedEncargado.nombre}" creado y asignado al área`, 'success');
+          }
+        } catch (err) {
+          console.log('Error creando encargado, pero continuamos con el nombre:', err);
+        }
+      }
       
       const res = await fetch(`${API_URL}/salidas`, {
         method: 'POST',
@@ -130,7 +164,7 @@ const InventarioPage = () => {
           codigo: selectedProductoSalida.codigo,
           cantidad: Number(salidaForm.cantidad),
           area: area ? area.nombre : '',
-          destinatario: encargado ? encargado.nombre : '',
+          destinatario: encargadoNombre,
           fecha: salidaForm.fecha
         })
       });
@@ -141,9 +175,11 @@ const InventarioPage = () => {
         cantidad: '',
         fecha: new Date().toISOString().slice(0, 10),
         encargadoId: '',
+        encargadoNombre: '',
         areaId: ''
       });
       setSelectedProductoSalida(null);
+      setSelectedEncargado(null);
       refresh();
     } catch (err) {
       showToast(err.message, 'error');
@@ -451,7 +487,10 @@ const InventarioPage = () => {
                   <select
                     required
                     value={salidaForm.areaId}
-                    onChange={e => setSalidaForm({...salidaForm, areaId: e.target.value, encargadoId: ''})}
+                    onChange={e => {
+                      setSalidaForm({...salidaForm, areaId: e.target.value, encargadoId: '', encargadoNombre: ''});
+                      setSelectedEncargado(null); // Limpiar encargado al cambiar área
+                    }}
                     style={{ width: '100%', padding: '8px 12px', border: '1px solid #ccc', borderRadius: 6, fontSize: '0.95rem' }}
                   >
                     <option value="">Seleccionar área</option>
@@ -463,17 +502,23 @@ const InventarioPage = () => {
 
                 <div style={{ marginBottom: 20 }}>
                   <label style={{ display: 'block', marginBottom: 6, fontWeight: 500, fontSize: '0.9rem' }}>Destinatario (Encargado) *</label>
-                  <select
+                  <EncargadoAutocomplete
+                    value={selectedEncargado ? selectedEncargado.nombre : ''}
+                    onChange={(encargado) => {
+                      setSelectedEncargado(encargado);
+                      setSalidaForm({
+                        ...salidaForm, 
+                        encargadoId: encargado?.id || '',
+                        encargadoNombre: encargado?.nombre || ''
+                      });
+                    }}
                     required
-                    value={salidaForm.encargadoId}
-                    onChange={e => setSalidaForm({...salidaForm, encargadoId: e.target.value})}
-                    style={{ width: '100%', padding: '8px 12px', border: '1px solid #ccc', borderRadius: 6, fontSize: '0.95rem' }}
-                  >
-                    <option value="">Seleccionar encargado</option>
-                    {getEncargadoOptions().map(enc => (
-                      <option key={enc.id} value={enc.id}>{enc.nombre}</option>
-                    ))}
-                  </select>
+                    areaId={salidaForm.areaId}
+                    placeholder="Buscar o escribir nombre del encargado..."
+                  />
+                  <div style={{ fontSize: '0.8rem', color: '#666', marginTop: 4, fontStyle: 'italic' }}>
+                    💡 Puedes escribir un nombre nuevo y se creará automáticamente
+                  </div>
                 </div>
 
                 <button type="submit" className="btn btn-warning" style={{ width: '100%', padding: '10px', fontSize: '1rem', fontWeight: 600 }}>
