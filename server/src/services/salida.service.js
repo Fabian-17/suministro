@@ -5,26 +5,43 @@ import { Inventario } from "../models/inventario.js";
 export const crearSalida = async (data) => {
     const { articulo, cantidad, fecha, area, destinatario, codigo } = data;
     try {
-        const inventario = await Inventario.findOne({ where: { articulo } });
+        // Buscar el artículo en inventario
+        let inventario = await Inventario.findOne({ where: { articulo } });
+        
+        let inventarioId = null;
+        let codigoFinal = codigo || 'S/C';
+        
         if (!inventario) {
-            throw new Error("Artículo no encontrado en inventario");
+            // Si no existe, crear el producto en inventario con cantidad 0
+            inventario = await Inventario.create({
+                articulo,
+                codigo: codigoFinal,
+                cantidad: 0,
+                entrada: 0,
+                salida: 0
+            });
+            inventarioId = inventario.id;
+        } else {
+            inventarioId = inventario.id;
+            codigoFinal = codigo || inventario.codigo;
         }
-        if (inventario.cantidad < cantidad) {
-            throw new Error("Cantidad insuficiente en inventario");
-        }
-        const nuevaSalida = await Salida.create({
-            articulo,
-            cantidad,
-            codigo: codigo || inventario.codigo,
-            fecha,
-            area,
-            destinatario,
-            inventarioId: inventario.id
-        });
+        
+        // Actualizar inventario (restar cantidad y aumentar salida)
         await inventario.update({
             cantidad: inventario.cantidad - cantidad,
             salida: inventario.salida + cantidad
         });
+        
+        const nuevaSalida = await Salida.create({
+            articulo,
+            cantidad,
+            codigo: codigoFinal,
+            fecha,
+            area,
+            destinatario,
+            inventarioId
+        });
+        
         return nuevaSalida;
     } catch (error) {
         throw new Error("Error al crear la salida: " + error.message);

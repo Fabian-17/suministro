@@ -115,9 +115,9 @@ const InventarioPage = () => {
   const handleSalidaSubmit = async (e) => {
     e.preventDefault();
     
-    // Validar que se haya seleccionado un producto
-    if (!selectedProductoSalida) {
-      showToast('Debes seleccionar un producto válido', 'error');
+    // Validar que se haya ingresado un producto (nombre)
+    if (!selectedProductoSalida || !selectedProductoSalida.articulo || selectedProductoSalida.articulo.trim().length === 0) {
+      showToast('Debes ingresar un producto', 'error');
       return;
     }
 
@@ -161,7 +161,7 @@ const InventarioPage = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           articulo: selectedProductoSalida.articulo,
-          codigo: selectedProductoSalida.codigo,
+          codigo: selectedProductoSalida.codigo || 'S/C', // S/C = Sin Código
           cantidad: Number(salidaForm.cantidad),
           area: area ? area.nombre : '',
           destinatario: encargadoNombre,
@@ -434,11 +434,11 @@ const InventarioPage = () => {
                       setSalidaForm({...salidaForm, productoId: product?.id || ''});
                     }}
                     required
-                    validateExists={true}
-                    placeholder="Buscar producto en inventario..."
+                    validateExists={false}
+                    placeholder="Buscar o escribir producto..."
                     showStock={true}
                   />
-                  {selectedProductoSalida && (
+                  {selectedProductoSalida && selectedProductoSalida.cantidad !== undefined && (
                     <div style={{ 
                       marginTop: 8, 
                       padding: '8px 12px', 
@@ -450,6 +450,18 @@ const InventarioPage = () => {
                       ✓ Stock disponible: {selectedProductoSalida.cantidad} unidades
                     </div>
                   )}
+                  {selectedProductoSalida && selectedProductoSalida.articulo && !selectedProductoSalida.id && (
+                    <div style={{ 
+                      marginTop: 8, 
+                      padding: '8px 12px', 
+                      background: '#fff3e0', 
+                      borderRadius: 4,
+                      fontSize: '0.85rem',
+                      color: '#f57c00'
+                    }}>
+                      ⚠️ Producto no registrado en inventario
+                    </div>
+                  )}
                 </div>
 
                 <div style={{ marginBottom: 16 }}>
@@ -458,15 +470,14 @@ const InventarioPage = () => {
                     type="number"
                     required
                     min="1"
-                    max={selectedProductoSalida ? selectedProductoSalida.cantidad : undefined}
                     value={salidaForm.cantidad}
                     onChange={e => setSalidaForm({...salidaForm, cantidad: e.target.value})}
                     style={{ width: '93%', padding: '8px 12px', border: '1px solid #ccc', borderRadius: 6, fontSize: '0.95rem' }}
-                    disabled={!selectedProductoSalida}
                   />
-                  {selectedProductoSalida && salidaForm.cantidad && Number(salidaForm.cantidad) > selectedProductoSalida.cantidad && (
-                    <div style={{ fontSize: '0.8rem', color: '#ff5252', marginTop: 4 }}>
-                      La cantidad supera el stock disponible ({selectedProductoSalida.cantidad})
+                  {selectedProductoSalida && selectedProductoSalida.cantidad !== undefined && 
+                   salidaForm.cantidad && Number(salidaForm.cantidad) > selectedProductoSalida.cantidad && (
+                    <div style={{ fontSize: '0.8rem', color: '#ff9800', marginTop: 4 }}>
+                      ⚠️ La cantidad supera el stock disponible ({selectedProductoSalida.cantidad})
                     </div>
                   )}
                 </div>
