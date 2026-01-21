@@ -15,6 +15,8 @@ const SalidasPage = () => {
   const [salidas, setSalidas] = useState([]);
   const [loading, setLoading] = useState(false);
   const [yearsAvailable, setYearsAvailable] = useState([]);
+  const [mostrarModalEliminar, setMostrarModalEliminar] = useState(false);
+  const [salidaAEliminar, setSalidaAEliminar] = useState(null);
 
   // Formatear fecha a dd-mm-yyyy
   function formatFecha(fechaStr) {
@@ -120,8 +122,130 @@ const SalidasPage = () => {
     setSearchArticulo('');
   };
 
+  // Eliminar salida
+  const eliminarSalida = async (id) => {
+    try {
+      const res = await fetch(`${API_URL}/salidas/${id}`, {
+        method: 'DELETE'
+      });
+      if (!res.ok) throw new Error('Error al eliminar salida');
+      showToast('✓ Salida eliminada correctamente. Stock devuelto al inventario.', 'success');
+      setMostrarModalEliminar(false);
+      setSalidaAEliminar(null);
+      cargarTodasSalidas();
+    } catch (err) {
+      showToast(err.message, 'error');
+    }
+  };
+
+  // Mostrar modal de confirmación
+  const confirmarEliminar = (salida) => {
+    setSalidaAEliminar(salida);
+    setMostrarModalEliminar(true);
+  };
+
+  // Cancelar eliminación
+  const cancelarEliminar = () => {
+    setMostrarModalEliminar(false);
+    setSalidaAEliminar(null);
+  };
+
   return (
     <div className="page">
+      {/* Modal de confirmación de eliminación */}
+      {mostrarModalEliminar && salidaAEliminar && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0,0,0,0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 9999
+        }}>
+          <div style={{
+            background: '#fff',
+            borderRadius: 12,
+            padding: '32px',
+            maxWidth: 450,
+            width: '90%',
+            boxShadow: '0 10px 40px rgba(0,0,0,0.2)'
+          }}>
+            <div style={{ 
+              fontSize: '3rem', 
+              textAlign: 'center', 
+              marginBottom: 16,
+              color: '#ff9800'
+            }}>
+              ⚠️
+            </div>
+            <h3 style={{ 
+              margin: '0 0 16px 0', 
+              textAlign: 'center',
+              color: '#333',
+              fontSize: '1.3rem'
+            }}>
+              ¿Eliminar esta salida?
+            </h3>
+            <div style={{
+              background: '#f5f5f5',
+              padding: '16px',
+              borderRadius: 8,
+              marginBottom: 20,
+              fontSize: '0.9rem'
+            }}>
+              <p style={{ margin: '0 0 8px 0' }}>
+                <strong>Artículo:</strong> {salidaAEliminar.articulo}
+              </p>
+              <p style={{ margin: '0 0 8px 0' }}>
+                <strong>Cantidad:</strong> {salidaAEliminar.cantidad}
+              </p>
+              <p style={{ margin: '0 0 8px 0' }}>
+                <strong>Destinatario:</strong> {salidaAEliminar.destinatario}
+              </p>
+              <p style={{ margin: 0, color: '#ff9800', fontWeight: 600, marginTop: 12 }}>
+                💡 El stock volverá al inventario
+              </p>
+            </div>
+            <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
+              <button
+                onClick={cancelarEliminar}
+                style={{
+                  padding: '10px 24px',
+                  background: '#e0e0e0',
+                  color: '#333',
+                  border: 'none',
+                  borderRadius: 6,
+                  cursor: 'pointer',
+                  fontWeight: 600,
+                  fontSize: '0.95rem'
+                }}
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={() => eliminarSalida(salidaAEliminar.id)}
+                style={{
+                  padding: '10px 24px',
+                  background: '#f44336',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: 6,
+                  cursor: 'pointer',
+                  fontWeight: 600,
+                  fontSize: '0.95rem'
+                }}
+              >
+                Sí, eliminar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Flecha para retroceder */}
       <button
         onClick={() => navigate(-1)}
@@ -349,6 +473,16 @@ const SalidasPage = () => {
                     }}>
                       Fecha
                     </th>
+                    <th style={{ 
+                      textAlign: 'center', 
+                      padding: '10px 12px', 
+                      fontWeight: 600, 
+                      color: '#333',
+                      borderBottom: '1px solid #d0d0d0',
+                      width: '80px'
+                    }}>
+                      Eliminar
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -402,10 +536,32 @@ const SalidasPage = () => {
                       <td style={{ 
                         padding: '8px 12px',
                         textAlign: 'center',
+                        borderRight: '1px solid #e8e8e8',
                         borderBottom: '1px solid #e8e8e8',
                         color: '#555'
                       }}>
                         {formatFecha(salida.fecha)}
+                      </td>
+                      <td style={{ 
+                        padding: '8px 12px',
+                        textAlign: 'center',
+                        borderBottom: '1px solid #e8e8e8'
+                      }}>
+                        <button
+                          onClick={() => confirmarEliminar(salida)}
+                          style={{
+                            padding: '6px 12px',
+                            background: '#f44336',
+                            color: '#fff',
+                            border: 'none',
+                            borderRadius: 4,
+                            cursor: 'pointer',
+                            fontSize: '0.85rem'
+                          }}
+                          title="Eliminar"
+                        >
+                          🗑
+                        </button>
                       </td>
                     </tr>
                   ))}

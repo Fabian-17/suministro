@@ -119,3 +119,30 @@ export const actualizarSalida = async (id, data) => {
         throw new Error("Error al actualizar la salida: " + error.message);
     }
 };
+
+export const eliminarSalida = async (id) => {
+    try {
+        const salida = await Salida.findByPk(id);
+        if (!salida) {
+            throw new Error("Salida no encontrada");
+        }
+
+        // Buscar el inventario asociado
+        const inventario = await Inventario.findOne({ where: { articulo: salida.articulo } });
+        
+        if (inventario) {
+            // Devolver la cantidad al inventario (sumar la cantidad de la salida)
+            await inventario.update({
+                cantidad: inventario.cantidad + salida.cantidad,
+                salida: inventario.salida - salida.cantidad
+            });
+        }
+
+        // Eliminar la salida
+        await salida.destroy();
+        
+        return { message: "Salida eliminada correctamente" };
+    } catch (error) {
+        throw new Error("Error al eliminar la salida: " + error.message);
+    }
+};

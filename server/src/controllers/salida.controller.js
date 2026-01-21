@@ -2,7 +2,8 @@ import { crearSalida,
     actualizarSalida,
     obtenerSalidaPorArticulo,
     obtenerSalidaPorFecha,
-    obtenerSalidas
+    obtenerSalidas,
+    eliminarSalida
  } from "../services/salida.service.js";
 import { Salida } from "../models/salida.js";
  import xlsx from "xlsx";
@@ -31,6 +32,16 @@ export const actualizarSalidaController = async (req, res) => {
         }
         const salidaActualizada = await actualizarSalida(id, { articulo, cantidad, codigo, area, destinatario });
         res.status(200).json(salidaActualizada);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+export const eliminarSalidaController = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const resultado = await eliminarSalida(id);
+        res.status(200).json(resultado);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
