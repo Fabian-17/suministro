@@ -120,32 +120,6 @@ const SalidasPage = () => {
     setSearchArticulo('');
   };
 
-  // Agrupar salidas por área y destinatario para PDF
-  const getGroupedSalidas = () => {
-    const grupos = {};
-    salidas.forEach(s => {
-      const area = s.area || 'Sin área';
-      const destinatario = s.destinatario || 'Sin destinatario';
-      
-      if (!grupos[area]) grupos[area] = {};
-      if (!grupos[area][destinatario]) grupos[area][destinatario] = [];
-      
-      grupos[area][destinatario].push(s);
-    });
-    return grupos;
-  };
-
-  // Agrupar salidas solo por destinatario para vista
-  const getGroupedSalidasPorDestinatario = () => {
-    const grupos = {};
-    salidas.forEach(s => {
-      const destinatario = s.destinatario || 'Sin destinatario';
-      if (!grupos[destinatario]) grupos[destinatario] = [];
-      grupos[destinatario].push(s);
-    });
-    return grupos;
-  };
-
   return (
     <div className="page">
       {/* Flecha para retroceder */}
@@ -261,7 +235,7 @@ const SalidasPage = () => {
             {salidas.length > 0 && (
               <button
                 className="btn btn-success"
-                onClick={() => generarReportePDF(getGroupedSalidas(), selectedMonth, selectedYear)}
+                onClick={() => generarReportePDF(salidas, selectedMonth, selectedYear)}
                 style={{ padding: '8px 16px', height: 'fit-content' }}
               >
                 Exportar PDF

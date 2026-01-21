@@ -1,9 +1,9 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
-export const generarReportePDF = (grupos, mes, año) => {
+export const generarReportePDF = (salidas, mes, año) => {
   // Validar que existan datos
-  if (!grupos || Object.keys(grupos).length === 0) {
+  if (!salidas || salidas.length === 0) {
     alert('No hay datos para generar el reporte');
     return;
   }
@@ -14,47 +14,71 @@ export const generarReportePDF = (grupos, mes, año) => {
   }
 
   const doc = new jsPDF();
-  const destinatariosUnicos = new Set();
 
-  // 🔹 Extraemos todos los destinatarios únicos
-  Object.keys(grupos).forEach((area) => {
-    Object.keys(grupos[area]).forEach((destinatario) => {
-      destinatariosUnicos.add(destinatario);
-    });
+  // Formatear fecha a dd-mm-yyyy
+  const formatFecha = (fechaStr) => {
+    if (!fechaStr) return '';
+    const [y, m, d] = fechaStr.slice(0,10).split('-');
+    return `${d}-${m}-${y}`;
+  };
+
+  // Obtener nombre del mes
+  const nombreMes = new Date(año, mes - 1, 1).toLocaleString('es', { month: 'long' });
+  const tituloMes = nombreMes.charAt(0).toUpperCase() + nombreMes.slice(1);
+
+  // Agrupar salidas por destinatario
+  const grupos = {};
+  salidas.forEach(s => {
+    const destinatario = s.destinatario || 'Sin destinatario';
+    if (!grupos[destinatario]) grupos[destinatario] = [];
+    grupos[destinatario].push(s);
   });
 
-  const destinatarios = Array.from(destinatariosUnicos);
+  const destinatarios = Object.keys(grupos);
 
   destinatarios.forEach((destinatario, index) => {
-    if (index > 0) doc.addPage(); // cada destinatario en nueva página
+    if (index > 0) doc.addPage(); // Nueva página para cada destinatario
 
+    // Título
     doc.setFontSize(16);
-    doc.text(`Reporte de Salidas - ${mes}/${año}`, 14, 20);
+    doc.text(`${tituloMes} ${año}`, 14, 20);
 
-    doc.setFontSize(14);
-    doc.text(`Destinatario: ${destinatario}`, 14, 30);
+    // Crear filas de la tabla para este destinatario
+    // Destinatario, Artículo, Código, Cantidad, Área, Fecha
+    const rows = grupos[destinatario].map((s) => [
+      destinatario,
+      s.articulo || '',
+      s.codigo || '',
+      s.cantidad || '',
+      s.area || '',
+      formatFecha(s.fecha)
+    ]);
 
-    let posY = 40;
-
-    // 🔹 Recorremos las áreas donde este destinatario tiene datos
-    Object.keys(grupos).forEach((area) => {
-      if (grupos[area][destinatario]) {
-        doc.setFontSize(12);
-        doc.text(`Área: ${area}`, 14, posY);
-
-        const rows = grupos[area][destinatario].map((s) => [
-          s.fecha?.slice(0, 10).split("-").reverse().join("-"),
-          s.articulo,
-          s.cantidad,
-        ]);
-
-        autoTable(doc, {
-          startY: posY + 5,
-          head: [["Fecha", "Artículo", "Cantidad"]],
-          body: rows,
-        });
-
-        posY = doc.lastAutoTable.finalY + 15; // mover cursor hacia abajo
+    // Generar tabla
+    autoTable(doc, {
+      startY: 30,
+      head: [['Destinatario', 'Artículo', 'Código', 'Cantidad', 'Área', 'Fecha']],
+      body: rows,
+      headStyles: {
+        fillColor: [25, 118, 210],
+        textColor: 255,
+        fontStyle: 'bold',
+        halign: 'left'
+      },
+      styles: {
+        fontSize: 9,
+        cellPadding: 3
+      },
+      columnStyles: {
+        0: { cellWidth: 40 }, // Destinatario
+        1: { cellWidth: 50 }, // Artículo
+        2: { cellWidth: 25 }, // Código
+        3: { cellWidth: 20, halign: 'right' }, // Cantidad
+        4: { cellWidth: 35 }, // Área
+        5: { cellWidth: 25, halign: 'center' } // Fecha
+      },
+      alternateRowStyles: {
+        fillColor: [245, 245, 245]
       }
     });
   });
