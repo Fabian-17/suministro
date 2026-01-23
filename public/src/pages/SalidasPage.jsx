@@ -66,7 +66,10 @@ const SalidasPage = () => {
       try {
         const res = await fetch(`${API_URL}/salidas`);
         const data = await res.json();
-        setAllSalidas(Array.isArray(data) ? data : []);
+        const salidasArray = Array.isArray(data) ? data : [];
+        // Ordenar por fecha descendente antes de guardar
+        salidasArray.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+        setAllSalidas(salidasArray);
       } catch (err) {
         setAllSalidas([]);
       }

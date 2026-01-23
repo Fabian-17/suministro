@@ -59,15 +59,20 @@ export const generarReportePDF = (salidas, mes, año) => {
       startY: 30,
       head: [['Destinatario', 'Artículo', 'Código', 'Cantidad', 'Área', 'Fecha']],
       body: rows,
+      theme: 'grid', // Usar tema grid para mostrar todas las líneas
       headStyles: {
         fillColor: [25, 118, 210],
         textColor: 255,
         fontStyle: 'bold',
-        halign: 'left'
+        halign: 'left',
+        lineWidth: 0.1,
+        lineColor: [0, 0, 0]
       },
       styles: {
         fontSize: 9,
-        cellPadding: 3
+        cellPadding: 3,
+        lineWidth: 0.1,
+        lineColor: [0, 0, 0]
       },
       columnStyles: {
         0: { cellWidth: 40 }, // Destinatario
