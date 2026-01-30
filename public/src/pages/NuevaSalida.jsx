@@ -209,12 +209,13 @@ const NuevaSalida = () => {
   if (!res.ok) { let data=null; try { data=await res.json(); } catch {}; throw new Error(data?.error || 'Error al registrar la salida'); }
       setProductoId('');
       setCantidad('');
-      setAreaId('');
-      setAreaInput('');
-      setEncargadoId('');
-      setEncargadoNombre('');
-      setEncargadoIsNew(false);
-  setFecha(formatLocalDate());
+      // NO resetear área, encargado ni fecha para mantenerlos
+      // setAreaId('');
+      // setAreaInput('');
+      // setEncargadoId('');
+      // setEncargadoNombre('');
+      // setEncargadoIsNew(false);
+      // setFecha(formatLocalDate());
       setSuccess('Salida registrada correctamente');
   showToast('Salida registrada','success');
     } catch (err) {
