@@ -96,8 +96,8 @@ const InventarioPage = () => {
           const encargadosDeArea = Array.isArray(data) ? data : [];
           setFilteredEncargados(encargadosDeArea);
           
-          // Si solo hay un encargado en esta área y no hay encargado seleccionado, autocompletarlo
-          if (encargadosDeArea.length === 1 && !selectedEncargado) {
+          // Si solo hay un encargado en esta área, autocompletarlo siempre
+          if (encargadosDeArea.length === 1) {
             const enc = encargadosDeArea[0];
             setSelectedEncargado({ id: enc.id, nombre: enc.nombre, isNew: false, areas: enc.areas || [] });
             setSalidaForm(prev => ({
@@ -105,6 +105,28 @@ const InventarioPage = () => {
               encargadoId: enc.id,
               encargadoNombre: enc.nombre
             }));
+          } else if (encargadosDeArea.length > 1) {
+            // Si hay varios encargados, limpiar la selección para que el usuario elija
+            // (pero solo si el encargado actual no pertenece a esta área)
+            if (selectedEncargado && selectedEncargado.id) {
+              const perteneceAlArea = encargadosDeArea.some(e => e.id === selectedEncargado.id);
+              if (!perteneceAlArea) {
+                setSelectedEncargado(null);
+                setSalidaForm(prev => ({
+                  ...prev,
+                  encargadoId: '',
+                  encargadoNombre: ''
+                }));
+              }
+            } else if (!selectedEncargado) {
+              // Si no hay encargado seleccionado, limpiar para que se muestren las sugerencias
+              setSelectedEncargado(null);
+              setSalidaForm(prev => ({
+                ...prev,
+                encargadoId: '',
+                encargadoNombre: ''
+              }));
+            }
           }
         })
         .catch(() => setFilteredEncargados([]));

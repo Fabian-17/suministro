@@ -52,9 +52,14 @@ const EncargadoAutocomplete = ({
           e.areas && e.areas.some(a => a.id === Number(areaId))
         );
         setSuggestions(filtered);
+        // Si hay encargados en el área, mostrar sugerencias automáticamente
+        if (filtered.length >= 1) {
+          setShowSuggestions(true);
+        }
       } else {
         // Mostrar todos los encargados si no hay búsqueda ni área
         setSuggestions(allEncargados.slice(0, 10));
+        setShowSuggestions(false);
       }
       return;
     }
@@ -188,6 +193,12 @@ const EncargadoAutocomplete = ({
       {!areaId && searchTerm && (
         <div style={{ fontSize: '0.8rem', color: '#ff9800', marginTop: 4 }}>
           💡 Selecciona un área primero para ver encargados sugeridos
+        </div>
+      )}
+      
+      {areaId && suggestions.length > 0 && !searchTerm && !showSuggestions && (
+        <div style={{ fontSize: '0.8rem', color: '#4caf50', marginTop: 4, fontWeight: 500 }}>
+          ✓ {suggestions.length} encargado{suggestions.length > 1 ? 's' : ''} disponible{suggestions.length > 1 ? 's' : ''} en esta área - Haz clic para ver
         </div>
       )}
       

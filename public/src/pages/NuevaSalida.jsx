@@ -116,12 +116,27 @@ const NuevaSalida = () => {
           const encargadosDeArea = Array.isArray(d)? d: [];
           setFilteredEncargados(encargadosDeArea);
           
-          // Si solo hay un encargado en esta área, autocompletarlo
-          if (encargadosDeArea.length === 1 && !encargadoId) {
+          // Si solo hay un encargado en esta área, autocompletarlo siempre
+          if (encargadosDeArea.length === 1) {
             const enc = encargadosDeArea[0];
             setEncargadoId(enc.id);
             setEncargadoNombre(enc.nombre);
             setEncargadoIsNew(false);
+          } else if (encargadosDeArea.length > 1) {
+            // Si hay varios encargados, limpiar si el actual no pertenece al área
+            if (encargadoId) {
+              const perteneceAlArea = encargadosDeArea.some(e => e.id === encargadoId);
+              if (!perteneceAlArea) {
+                setEncargadoId('');
+                setEncargadoNombre('');
+                setEncargadoIsNew(false);
+              }
+            } else if (!encargadoId) {
+              // Si no hay encargado seleccionado, asegurar que esté limpio para mostrar sugerencias
+              setEncargadoId('');
+              setEncargadoNombre('');
+              setEncargadoIsNew(false);
+            }
           }
         }
         catch(e){ setFilteredEncargados([]); showToast(e.message,'error'); }
