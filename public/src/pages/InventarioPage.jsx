@@ -92,7 +92,21 @@ const InventarioPage = () => {
     if (salidaForm.areaId) {
       fetch(`${API_URL}/encargados/area/${salidaForm.areaId}`)
         .then(r => r.json())
-        .then(data => setFilteredEncargados(Array.isArray(data) ? data : []))
+        .then(data => {
+          const encargadosDeArea = Array.isArray(data) ? data : [];
+          setFilteredEncargados(encargadosDeArea);
+          
+          // Si solo hay un encargado en esta área y no hay encargado seleccionado, autocompletarlo
+          if (encargadosDeArea.length === 1 && !selectedEncargado) {
+            const enc = encargadosDeArea[0];
+            setSelectedEncargado({ id: enc.id, nombre: enc.nombre, isNew: false, areas: enc.areas || [] });
+            setSalidaForm(prev => ({
+              ...prev,
+              encargadoId: enc.id,
+              encargadoNombre: enc.nombre
+            }));
+          }
+        })
         .catch(() => setFilteredEncargados([]));
     } else {
       setFilteredEncargados([]);
@@ -146,8 +160,8 @@ const InventarioPage = () => {
   // Seleccionar un área de las sugerencias
   const selectArea = (area) => {
     setAreaInput(area.nombre);
-    setSalidaForm({...salidaForm, areaId: area.id, encargadoId: '', encargadoNombre: ''});
-    setSelectedEncargado(null);
+    setSalidaForm({...salidaForm, areaId: area.id});
+    // NO limpiar el encargado cuando se cambia el área
     setShowAreaSuggestions(false);
   };
 
@@ -542,6 +556,18 @@ const InventarioPage = () => {
                         encargadoId: encargado?.id || '',
                         encargadoNombre: encargado?.nombre || ''
                       });
+                      
+                      // Si el encargado tiene áreas y no hay área seleccionada, autocompletar con la primera área
+                      if (encargado?.areas && encargado.areas.length > 0 && !salidaForm.areaId) {
+                        const primeraArea = encargado.areas[0];
+                        setSalidaForm(prev => ({
+                          ...prev,
+                          areaId: primeraArea.id,
+                          encargadoId: encargado?.id || '',
+                          encargadoNombre: encargado?.nombre || ''
+                        }));
+                        setAreaInput(primeraArea.nombre);
+                      }
                     }}
                     required
                     areaId={salidaForm.areaId}

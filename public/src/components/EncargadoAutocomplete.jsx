@@ -82,7 +82,7 @@ const EncargadoAutocomplete = ({
   const handleSelectEncargado = (encargado) => {
     setSearchTerm(encargado.nombre);
     setShowSuggestions(false);
-    onChange({ id: encargado.id, nombre: encargado.nombre, isNew: false });
+    onChange({ id: encargado.id, nombre: encargado.nombre, isNew: false, areas: encargado.areas || [] });
   };
 
   const handleInputChange = (e) => {
@@ -97,10 +97,10 @@ const EncargadoAutocomplete = ({
     
     if (encargadoExistente) {
       // Si existe, usar ese encargado
-      onChange({ id: encargadoExistente.id, nombre: encargadoExistente.nombre, isNew: false });
+      onChange({ id: encargadoExistente.id, nombre: encargadoExistente.nombre, isNew: false, areas: encargadoExistente.areas || [] });
     } else {
       // Si no existe, marcar como nuevo
-      onChange({ id: null, nombre: newValue, isNew: true });
+      onChange({ id: null, nombre: newValue, isNew: true, areas: [] });
     }
   };
 
