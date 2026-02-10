@@ -406,20 +406,19 @@ const InventarioPage = () => {
           </div>
 
           {/* Formulario de Entrada */}
-          {formularioActivo === 'entrada' && (
-            <>
-              <h3 style={{ 
-                marginTop: 0, 
-                marginBottom: 20, 
-                color: '#1976d2',
-                fontSize: '1.2rem'
-              }}>
-                ➕ Nueva Entrada
-              </h3>
-              <NuevoRegistroForm onSuccess={() => {
-                // No recargar todo el inventario, el usuario puede refrescar manualmente si quiere ver el cambio
-                showToast('Entrada registrada correctamente', 'success');
-              }} />
+          <div style={{ display: formularioActivo === 'entrada' ? 'block' : 'none' }}>
+            <h3 style={{ 
+              marginTop: 0, 
+              marginBottom: 20, 
+              color: '#1976d2',
+              fontSize: '1.2rem'
+            }}>
+              ➕ Nueva Entrada
+            </h3>
+            <NuevoRegistroForm onSuccess={() => {
+              // No recargar todo el inventario, el usuario puede refrescar manualmente si quiere ver el cambio
+              showToast('Entrada registrada correctamente', 'success');
+            }} />
 
               {/* Formulario para subir Excel */}
               <div style={{ 
@@ -472,13 +471,11 @@ const InventarioPage = () => {
                   )}
                 </form>
               </div>
-            </>
-          )}
+          </div>
 
           {/* Formulario de Salida */}
-          {formularioActivo === 'salida' && (
-            <>
-              <h3 style={{ 
+          <div style={{ display: formularioActivo === 'salida' ? 'block' : 'none' }}>
+            <h3 style={{ 
                 marginTop: 0, 
                 marginBottom: 20, 
                 color: '#ff9800',
@@ -639,8 +636,7 @@ const InventarioPage = () => {
                   📤 Registrar Salida
                 </button>
               </form>
-            </>
-          )}
+          </div>
         </div>
 
         {/* COLUMNA DERECHA - Inventario */}
