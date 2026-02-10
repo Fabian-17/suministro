@@ -154,7 +154,7 @@ const SalidasPage = () => {
   };
 
   return (
-    <div className="page">
+    <div className="page" style={{ maxWidth: '95%', width: '100%', margin: '1.5rem auto', padding: '1.5rem' }}>
       {/* Modal de confirmación de eliminación */}
       {mostrarModalEliminar && salidaAEliminar && (
         <div style={{
@@ -407,14 +407,14 @@ const SalidasPage = () => {
               <table style={{ 
                 width: '100%', 
                 borderCollapse: 'collapse', 
-                fontSize: '0.9rem',
+                fontSize: '1.05rem',
                 fontFamily: 'Arial, sans-serif'
               }}>
                 <thead>
                   <tr style={{ background: '#f0f0f0' }}>
                     <th style={{ 
                       textAlign: 'left', 
-                      padding: '10px 12px', 
+                      padding: '14px 16px', 
                       fontWeight: 600, 
                       color: '#333',
                       borderRight: '1px solid #d0d0d0',
@@ -425,7 +425,7 @@ const SalidasPage = () => {
                     </th>
                     <th style={{ 
                       textAlign: 'left', 
-                      padding: '10px 12px', 
+                      padding: '14px 16px', 
                       fontWeight: 600, 
                       color: '#333',
                       borderRight: '1px solid #d0d0d0',
@@ -435,7 +435,7 @@ const SalidasPage = () => {
                     </th>
                     <th style={{ 
                       textAlign: 'left', 
-                      padding: '10px 12px', 
+                      padding: '14px 16px', 
                       fontWeight: 600, 
                       color: '#333',
                       borderRight: '1px solid #d0d0d0',
@@ -446,7 +446,7 @@ const SalidasPage = () => {
                     </th>
                     <th style={{ 
                       textAlign: 'right', 
-                      padding: '10px 12px', 
+                      padding: '14px 16px', 
                       fontWeight: 600, 
                       color: '#333',
                       borderRight: '1px solid #d0d0d0',
@@ -457,7 +457,7 @@ const SalidasPage = () => {
                     </th>
                     <th style={{ 
                       textAlign: 'left', 
-                      padding: '10px 12px', 
+                      padding: '14px 16px', 
                       fontWeight: 600, 
                       color: '#333',
                       borderRight: '1px solid #d0d0d0',
@@ -468,7 +468,7 @@ const SalidasPage = () => {
                     </th>
                     <th style={{ 
                       textAlign: 'center', 
-                      padding: '10px 12px', 
+                      padding: '14px 16px', 
                       fontWeight: 600, 
                       color: '#333',
                       borderBottom: '1px solid #d0d0d0',
@@ -478,7 +478,7 @@ const SalidasPage = () => {
                     </th>
                     <th style={{ 
                       textAlign: 'center', 
-                      padding: '10px 12px', 
+                      padding: '14px 16px', 
                       fontWeight: 600, 
                       color: '#333',
                       borderBottom: '1px solid #d0d0d0',
@@ -497,21 +497,21 @@ const SalidasPage = () => {
                       }}
                     >
                       <td style={{ 
-                        padding: '8px 12px',
+                        padding: '12px 16px',
                         borderRight: '1px solid #e8e8e8',
                         borderBottom: '1px solid #e8e8e8'
                       }}>
                         {salida.destinatario}
                       </td>
                       <td style={{ 
-                        padding: '8px 12px',
+                        padding: '12px 16px',
                         borderRight: '1px solid #e8e8e8',
                         borderBottom: '1px solid #e8e8e8'
                       }}>
                         {salida.articulo}
                       </td>
                       <td style={{ 
-                        padding: '8px 12px',
+                        padding: '12px 16px',
                         borderRight: '1px solid #e8e8e8',
                         borderBottom: '1px solid #e8e8e8',
                         fontFamily: 'Consolas, monospace',
@@ -520,7 +520,7 @@ const SalidasPage = () => {
                         {salida.codigo}
                       </td>
                       <td style={{ 
-                        padding: '8px 12px',
+                        padding: '12px 16px',
                         textAlign: 'right',
                         borderRight: '1px solid #e8e8e8',
                         borderBottom: '1px solid #e8e8e8',
@@ -529,7 +529,7 @@ const SalidasPage = () => {
                         {salida.cantidad}
                       </td>
                       <td style={{ 
-                        padding: '8px 12px',
+                        padding: '12px 16px',
                         borderRight: '1px solid #e8e8e8',
                         borderBottom: '1px solid #e8e8e8',
                         color: '#555'
@@ -537,7 +537,7 @@ const SalidasPage = () => {
                         {salida.area}
                       </td>
                       <td style={{ 
-                        padding: '8px 12px',
+                        padding: '12px 16px',
                         textAlign: 'center',
                         borderRight: '1px solid #e8e8e8',
                         borderBottom: '1px solid #e8e8e8',
@@ -546,14 +546,14 @@ const SalidasPage = () => {
                         {formatFecha(salida.fecha)}
                       </td>
                       <td style={{ 
-                        padding: '8px 12px',
+                        padding: '12px 16px',
                         textAlign: 'center',
                         borderBottom: '1px solid #e8e8e8'
                       }}>
                         <button
                           onClick={() => confirmarEliminar(salida)}
                           style={{
-                            padding: '6px 12px',
+                            padding: '8px 14px',
                             background: '#f44336',
                             color: '#fff',
                             border: 'none',
