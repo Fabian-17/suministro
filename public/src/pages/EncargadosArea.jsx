@@ -99,10 +99,7 @@ const EncargadosArea = () => {
         })
       });
       
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || 'Error al crear encargado');
-      }
+      if (!res.ok) throw new Error('Error al crear encargado');
       
       await fetchEncargados();
       setNombreEncargado('');
@@ -132,10 +129,7 @@ const EncargadosArea = () => {
         body: JSON.stringify({ nombre: nombreArea })
       });
       
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || 'Error al crear área');
-      }
+      if (!res.ok) throw new Error('Error al crear área');
       
       await fetchAreas();
       setNombreArea('');

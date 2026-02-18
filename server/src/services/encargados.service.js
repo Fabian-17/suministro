@@ -1,7 +1,6 @@
 import { Encargados } from "../models/encargados.js";
 import { Areas } from "../models/areas.js";
 import { AreaEncargado } from "../models/area_encargado.js";
-import { Op } from "sequelize";
 
 
 export const getAllEncargados = async () => {
@@ -14,32 +13,7 @@ export const getAllEncargados = async () => {
 };
 
 // Crear un encargado y asignarlo a una o varias áreas
-export const createEncargadoWithAreas = async (nombreRaw, areaIds = []) => {
-    // Validar que el nombre sea una cadena válida
-    if (typeof nombreRaw !== "string") {
-        throw new Error("Nombre inválido");
-    }
-
-    const nombre = nombreRaw.trim();
-    if (!nombre) {
-        throw new Error("El nombre es requerido");
-    }
-    if (nombre.length > 100) {
-        throw new Error("El nombre excede la longitud permitida");
-    }
-
-    // Verificar si ya existe un encargado con ese nombre (ignorando mayúsculas/minúsculas)
-    const existente = await Encargados.findOne({ 
-        where: { 
-            nombre: {
-                [Op.iLike]: nombre
-            }
-        } 
-    });
-    if (existente) {
-        throw new Error("El encargado ya existe");
-    }
-
+export const createEncargadoWithAreas = async (nombre, areaIds = []) => {
     const encargado = await Encargados.create({ nombre });
     if (areaIds.length > 0) {
         await encargado.setAreas(areaIds); // método de Sequelize por belongsToMany

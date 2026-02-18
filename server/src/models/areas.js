@@ -9,11 +9,7 @@ export const Areas = sequelize.define("areas", {
     },
     nombre: {
         type: DataTypes.STRING,
-        allowNull: false,
-        unique: {
-            name: 'unique_area_nombre',
-            msg: 'El nombre del área ya existe'
-        }
+        allowNull: false
     },
 }, {
     timestamps: true,
