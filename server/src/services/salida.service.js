@@ -2,7 +2,7 @@ import { Salida } from "../models/salida.js";
 import { Inventario } from "../models/inventario.js";
 import { Areas } from "../models/areas.js";
 import { Encargados } from "../models/encargados.js";
-import { Sequelize } from "sequelize";
+import { Op } from "sequelize";
 
 
 export const crearSalida = async (data) => {
@@ -11,17 +11,34 @@ export const crearSalida = async (data) => {
         // 1. Buscar o crear el área si no existe
         let areaIdFinal = areaId;
         if (!areaId && area) {
+            const areaNormalizada = area.trim();
             // Buscar área por nombre (case insensitive)
             let areaExistente = await Areas.findOne({
-                where: Sequelize.where(
-                    Sequelize.fn('LOWER', Sequelize.col('nombre')),
-                    Sequelize.fn('LOWER', area.trim())
-                )
+                where: { 
+                    nombre: { 
+                        [Op.iLike]: areaNormalizada 
+                    } 
+                }
             });
             
             if (!areaExistente) {
-                // Crear área nueva
-                areaExistente = await Areas.create({ nombre: area.trim() });
+                try {
+                    // Crear área nueva
+                    areaExistente = await Areas.create({ nombre: areaNormalizada });
+                } catch (err) {
+                    // Si falla por duplicado (constraint unique), buscar nuevamente
+                    if (err.name === 'SequelizeUniqueConstraintError') {
+                        areaExistente = await Areas.findOne({
+                            where: { 
+                                nombre: { 
+                                    [Op.iLike]: areaNormalizada 
+                                } 
+                            }
+                        });
+                    } else {
+                        throw err;
+                    }
+                }
             }
             areaIdFinal = areaExistente.id;
         }
@@ -29,23 +46,47 @@ export const crearSalida = async (data) => {
         // 2. Buscar o crear el encargado si no existe
         let encargadoIdFinal = destinatarioId;
         if (!destinatarioId && destinatario) {
+            const destinatarioNormalizado = destinatario.trim();
             // Buscar encargado por nombre (case insensitive)
             let encargadoExistente = await Encargados.findOne({
-                where: Sequelize.where(
-                    Sequelize.fn('LOWER', Sequelize.col('nombre')),
-                    Sequelize.fn('LOWER', destinatario.trim())
-                )
+                where: { 
+                    nombre: { 
+                        [Op.iLike]: destinatarioNormalizado 
+                    } 
+                }
             });
             
             if (!encargadoExistente) {
-                // Crear encargado nuevo
-                encargadoExistente = await Encargados.create({ nombre: destinatario.trim() });
+                try {
+                    // Crear encargado nuevo
+                    encargadoExistente = await Encargados.create({ nombre: destinatarioNormalizado });
+                } catch (err) {
+                    // Si falla por duplicado (constraint unique), buscar nuevamente
+                    if (err.name === 'SequelizeUniqueConstraintError') {
+                        encargadoExistente = await Encargados.findOne({
+                            where: { 
+                                nombre: { 
+                                    [Op.iLike]: destinatarioNormalizado 
+                                } 
+                            }
+                        });
+                    } else {
+                        throw err;
+                    }
+                }
             }
             encargadoIdFinal = encargadoExistente.id;
             
             // Asociar el encargado al área si ambos existen
-            if (areaIdFinal) {
-                await encargadoExistente.addArea(areaIdFinal);
+            if (areaIdFinal && encargadoExistente) {
+                try {
+                    await encargadoExistente.addArea(areaIdFinal);
+                } catch (err) {
+                    // Si ya está asociado, ignorar el error
+                    if (!err.name || !err.name.includes('Unique')) {
+                        console.error('Error al asociar encargado con área:', err);
+                    }
+                }
             }
         } else if (destinatarioId && areaIdFinal) {
             // Si se seleccionó un encargado existente, asegurarse de que esté asociado al área
@@ -54,7 +95,14 @@ export const crearSalida = async (data) => {
                 const areas = await encargado.getAreas();
                 const yaAsociado = areas.some(a => a.id === Number(areaIdFinal));
                 if (!yaAsociado) {
-                    await encargado.addArea(areaIdFinal);
+                    try {
+                        await encargado.addArea(areaIdFinal);
+                    } catch (err) {
+                        // Si ya está asociado, ignorar el error
+                        if (!err.name || !err.name.includes('Unique')) {
+                            console.error('Error al asociar encargado existente con área:', err);
+                        }
+                    }
                 }
             }
         }

@@ -6,7 +6,8 @@ import { crearSalida,
     eliminarSalida
  } from "../services/salida.service.js";
 import { Salida } from "../models/salida.js";
- import xlsx from "xlsx";
+import xlsx from "xlsx";
+import { Op } from "sequelize";
 
 
 export const crearSalidaController = async (req, res) => {
@@ -218,14 +219,17 @@ export const uploadExcelSalidasController = async (req, res) => {
 
       if (!articulo || !cantidad || !parsedFecha) continue;
 
-      await Salida.create({
+      // Usar el servicio de salida para manejar duplicados de áreas y encargados
+      await crearSalida({
         articulo,
         cantidad,
         fecha: parsedFecha,
         area: area || "",
+        areaId: null,
         destinatario: destinatario || "",
-        codigo: "SIN-CODIGO",
-        inventarioId: null,
+        destinatarioId: null,
+        destinatarioIsNew: false,
+        codigo: "SIN-CODIGO"
       });
 
       count++;

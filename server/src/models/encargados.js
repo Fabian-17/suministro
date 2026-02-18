@@ -9,7 +9,11 @@ export const Encargados = sequelize.define("encargados", {
     },
     nombre: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: false,
+        unique: {
+            name: 'unique_encargado_nombre',
+            msg: 'El nombre del encargado ya existe'
+        }
     },
 },
 {

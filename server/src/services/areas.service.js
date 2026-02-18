@@ -1,4 +1,5 @@
 import { Areas } from "../models/areas.js";
+import { Op } from "sequelize";
 
 export const getAllAreas = async () => {
     try {
@@ -23,7 +24,14 @@ export const createArea = async (nombreRaw) => {
     }
 
     try {
-        const existente = await Areas.findOne({ where: { nombre } });
+        // Validar duplicados ignorando mayúsculas/minúsculas
+        const existente = await Areas.findOne({ 
+            where: { 
+                nombre: {
+                    [Op.iLike]: nombre
+                }
+            } 
+        });
         if (existente) {
             throw new Error("El área ya existe");
         }
