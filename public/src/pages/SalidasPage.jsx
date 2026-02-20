@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { generarReportePDF } from '../components/reportes';
+import { exportarSalidasPorDestinatarioYArticulo } from '../utils/exportarExcel';
 import { useToast } from '../context/ToastContext.jsx';
 import API_URL from '../config/api';
 
@@ -360,13 +361,24 @@ const SalidasPage = () => {
             </button>
 
             {salidas.length > 0 && (
-              <button
-                className="btn btn-success"
-                onClick={() => generarReportePDF(salidas, selectedMonth, selectedYear)}
-                style={{ padding: '8px 16px', height: 'fit-content' }}
-              >
-                Exportar PDF
-              </button>
+              <>
+                <button
+                  className="btn btn-success"
+                  onClick={() => generarReportePDF(salidas, selectedMonth, selectedYear)}
+                  style={{ padding: '8px 16px', height: 'fit-content' }}
+                >
+                  📄 Exportar PDF
+                </button>
+                
+                <button
+                  className="btn btn-primary"
+                  onClick={() => exportarSalidasPorDestinatarioYArticulo(salidas)}
+                  style={{ padding: '8px 16px', height: 'fit-content' }}
+                  title="Exportar Excel ordenado por destinatario y artículo"
+                >
+                  📊 Exportar Excel
+                </button>
+              </>
             )}
           </div>
         </div>
