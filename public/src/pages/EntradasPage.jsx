@@ -155,7 +155,7 @@ const EntradasPage = () => {
   }
 
   return (
-    <div className="page">
+    <div className="page" style={{ maxWidth: '95%', width: '100%', margin: '1.5rem auto', padding: '1.5rem' }}>
       {/* Modal de confirmación de eliminación */}
       {mostrarModalEliminar && entradaAEliminar && (
         <div style={{
@@ -373,14 +373,14 @@ const EntradasPage = () => {
             <table style={{ 
               width: '100%', 
               borderCollapse: 'collapse', 
-              fontSize: '0.9rem',
+              fontSize: '1.05rem',
               fontFamily: 'Arial, sans-serif'
             }}>
               <thead>
                 <tr style={{ background: '#f0f0f0' }}>
                   <th style={{ 
                     textAlign: 'left', 
-                    padding: '10px 12px', 
+                    padding: '14px 16px', 
                     fontWeight: 600, 
                     color: '#333',
                     borderRight: '1px solid #d0d0d0',
@@ -390,7 +390,7 @@ const EntradasPage = () => {
                   </th>
                   <th style={{ 
                     textAlign: 'left', 
-                    padding: '10px 12px', 
+                    padding: '14px 16px', 
                     fontWeight: 600, 
                     color: '#333',
                     borderRight: '1px solid #d0d0d0',
@@ -401,7 +401,7 @@ const EntradasPage = () => {
                   </th>
                   <th style={{ 
                     textAlign: 'right', 
-                    padding: '10px 12px', 
+                    padding: '14px 16px', 
                     fontWeight: 600, 
                     color: '#333',
                     borderRight: '1px solid #d0d0d0',
@@ -412,7 +412,7 @@ const EntradasPage = () => {
                   </th>
                   <th style={{ 
                     textAlign: 'center', 
-                    padding: '10px 12px', 
+                    padding: '14px 16px', 
                     fontWeight: 600, 
                     color: '#333',
                     borderRight: '1px solid #d0d0d0',
@@ -423,7 +423,7 @@ const EntradasPage = () => {
                   </th>
                   <th style={{ 
                     textAlign: 'center', 
-                    padding: '10px 12px', 
+                    padding: '14px 16px', 
                     fontWeight: 600, 
                     color: '#333',
                     borderRight: '1px solid #d0d0d0',
@@ -434,7 +434,7 @@ const EntradasPage = () => {
                   </th>
                   <th style={{ 
                     textAlign: 'center', 
-                    padding: '10px 12px', 
+                    padding: '14px 16px', 
                     fontWeight: 600, 
                     color: '#333',
                     borderBottom: '1px solid #d0d0d0',
@@ -468,7 +468,7 @@ const EntradasPage = () => {
                         }}
                       >
                         <td style={{ 
-                          padding: '8px 12px',
+                          padding: '12px 16px',
                           borderRight: '1px solid #e8e8e8',
                           borderBottom: '1px solid #e8e8e8'
                         }}>
@@ -477,12 +477,12 @@ const EntradasPage = () => {
                               type="text"
                               value={formEditEntrada.articulo}
                               onChange={e => setFormEditEntrada({...formEditEntrada, articulo: e.target.value})}
-                              style={{ width: '95%', padding: '4px', border: '1px solid #ccc', borderRadius: 4 }}
+                              style={{ width: '95%', padding: '6px', border: '1px solid #ccc', borderRadius: 4, fontSize: '1rem' }}
                             />
                           ) : i.articulo}
                         </td>
                         <td style={{ 
-                          padding: '8px 12px',
+                          padding: '12px 16px',
                           borderRight: '1px solid #e8e8e8',
                           borderBottom: '1px solid #e8e8e8',
                           fontFamily: 'Consolas, monospace',
@@ -493,12 +493,12 @@ const EntradasPage = () => {
                               type="text"
                               value={formEditEntrada.codigo}
                               onChange={e => setFormEditEntrada({...formEditEntrada, codigo: e.target.value})}
-                              style={{ width: '95%', padding: '4px', border: '1px solid #ccc', borderRadius: 4 }}
+                              style={{ width: '95%', padding: '6px', border: '1px solid #ccc', borderRadius: 4, fontSize: '1rem' }}
                             />
                           ) : i.codigo}
                         </td>
                         <td style={{ 
-                          padding: '8px 12px',
+                          padding: '12px 16px',
                           borderRight: '1px solid #e8e8e8',
                           borderBottom: '1px solid #e8e8e8',
                           textAlign: 'right',
@@ -509,12 +509,12 @@ const EntradasPage = () => {
                               type="number"
                               value={formEditEntrada.cantidad}
                               onChange={e => setFormEditEntrada({...formEditEntrada, cantidad: parseInt(e.target.value) || 0})}
-                              style={{ width: '70%', padding: '4px', border: '1px solid #ccc', borderRadius: 4, textAlign: 'right' }}
+                              style={{ width: '70%', padding: '6px', border: '1px solid #ccc', borderRadius: 4, textAlign: 'right', fontSize: '1rem' }}
                             />
                           ) : i.cantidad}
                         </td>
                         <td style={{ 
-                          padding: '8px 12px',
+                          padding: '12px 16px',
                           borderRight: '1px solid #e8e8e8',
                           borderBottom: '1px solid #e8e8e8',
                           textAlign: 'center',
@@ -525,12 +525,12 @@ const EntradasPage = () => {
                               type="date"
                               value={formEditEntrada.fecha}
                               onChange={e => setFormEditEntrada({...formEditEntrada, fecha: e.target.value})}
-                              style={{ width: '95%', padding: '4px', border: '1px solid #ccc', borderRadius: 4 }}
+                              style={{ width: '95%', padding: '6px', border: '1px solid #ccc', borderRadius: 4, fontSize: '1rem' }}
                             />
                           ) : formatFecha(i.fecha)}
                         </td>
                         <td style={{ 
-                          padding: '8px 12px',
+                          padding: '12px 16px',
                           borderRight: '1px solid #e8e8e8',
                           borderBottom: '1px solid #e8e8e8',
                           textAlign: 'center'
@@ -539,13 +539,13 @@ const EntradasPage = () => {
                             <button
                               onClick={() => guardarEdicion(i.id)}
                               style={{
-                                padding: '4px 8px',
+                                padding: '6px 12px',
                                 background: '#4caf50',
                                 color: '#fff',
                                 border: 'none',
                                 borderRadius: 4,
                                 cursor: 'pointer',
-                                fontSize: '0.75rem'
+                                fontSize: '0.95rem'
                               }}
                               title="Guardar"
                             >
@@ -555,13 +555,13 @@ const EntradasPage = () => {
                             <button
                               onClick={() => iniciarEdicion(i)}
                               style={{
-                                padding: '4px 8px',
+                                padding: '6px 12px',
                                 background: '#2196f3',
                                 color: '#fff',
                                 border: 'none',
                                 borderRadius: 4,
                                 cursor: 'pointer',
-                                fontSize: '0.75rem'
+                                fontSize: '0.95rem'
                               }}
                               title="Editar"
                             >
@@ -570,7 +570,7 @@ const EntradasPage = () => {
                           )}
                         </td>
                         <td style={{ 
-                          padding: '8px 12px',
+                          padding: '12px 16px',
                           borderBottom: '1px solid #e8e8e8',
                           textAlign: 'center'
                         }}>
@@ -578,13 +578,13 @@ const EntradasPage = () => {
                             <button
                               onClick={cancelarEdicion}
                               style={{
-                                padding: '4px 8px',
+                                padding: '6px 12px',
                                 background: '#9e9e9e',
                                 color: '#fff',
                                 border: 'none',
                                 borderRadius: 4,
                                 cursor: 'pointer',
-                                fontSize: '0.75rem'
+                                fontSize: '0.95rem'
                               }}
                               title="Cancelar"
                             >
@@ -594,13 +594,13 @@ const EntradasPage = () => {
                             <button
                               onClick={() => confirmarEliminar(i)}
                               style={{
-                                padding: '4px 8px',
+                                padding: '6px 12px',
                                 background: '#f44336',
                                 color: '#fff',
                                 border: 'none',
                                 borderRadius: 4,
                                 cursor: 'pointer',
-                                fontSize: '0.75rem'
+                                fontSize: '0.95rem'
                               }}
                               title="Eliminar"
                             >

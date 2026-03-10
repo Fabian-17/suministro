@@ -92,7 +92,43 @@ const InventarioPage = () => {
     if (salidaForm.areaId) {
       fetch(`${API_URL}/encargados/area/${salidaForm.areaId}`)
         .then(r => r.json())
-        .then(data => setFilteredEncargados(Array.isArray(data) ? data : []))
+        .then(data => {
+          const encargadosDeArea = Array.isArray(data) ? data : [];
+          setFilteredEncargados(encargadosDeArea);
+          
+          // Si solo hay un encargado en esta área, autocompletarlo siempre
+          if (encargadosDeArea.length === 1) {
+            const enc = encargadosDeArea[0];
+            setSelectedEncargado({ id: enc.id, nombre: enc.nombre, isNew: false, areas: enc.areas || [] });
+            setSalidaForm(prev => ({
+              ...prev,
+              encargadoId: enc.id,
+              encargadoNombre: enc.nombre
+            }));
+          } else if (encargadosDeArea.length > 1) {
+            // Si hay varios encargados, limpiar la selección para que el usuario elija
+            // (pero solo si el encargado actual no pertenece a esta área)
+            if (selectedEncargado && selectedEncargado.id) {
+              const perteneceAlArea = encargadosDeArea.some(e => e.id === selectedEncargado.id);
+              if (!perteneceAlArea) {
+                setSelectedEncargado(null);
+                setSalidaForm(prev => ({
+                  ...prev,
+                  encargadoId: '',
+                  encargadoNombre: ''
+                }));
+              }
+            } else if (!selectedEncargado) {
+              // Si no hay encargado seleccionado, limpiar para que se muestren las sugerencias
+              setSelectedEncargado(null);
+              setSalidaForm(prev => ({
+                ...prev,
+                encargadoId: '',
+                encargadoNombre: ''
+              }));
+            }
+          }
+        })
         .catch(() => setFilteredEncargados([]));
     } else {
       setFilteredEncargados([]);
@@ -146,8 +182,8 @@ const InventarioPage = () => {
   // Seleccionar un área de las sugerencias
   const selectArea = (area) => {
     setAreaInput(area.nombre);
-    setSalidaForm({...salidaForm, areaId: area.id, encargadoId: '', encargadoNombre: ''});
-    setSelectedEncargado(null);
+    setSalidaForm({...salidaForm, areaId: area.id});
+    // NO limpiar el encargado cuando se cambia el área
     setShowAreaSuggestions(false);
   };
 
@@ -392,20 +428,19 @@ const InventarioPage = () => {
           </div>
 
           {/* Formulario de Entrada */}
-          {formularioActivo === 'entrada' && (
-            <>
-              <h3 style={{ 
-                marginTop: 0, 
-                marginBottom: 20, 
-                color: '#1976d2',
-                fontSize: '1.2rem'
-              }}>
-                ➕ Nueva Entrada
-              </h3>
-              <NuevoRegistroForm onSuccess={() => {
-                // No recargar todo el inventario, el usuario puede refrescar manualmente si quiere ver el cambio
-                showToast('Entrada registrada correctamente', 'success');
-              }} />
+          <div style={{ display: formularioActivo === 'entrada' ? 'block' : 'none' }}>
+            <h3 style={{ 
+              marginTop: 0, 
+              marginBottom: 20, 
+              color: '#1976d2',
+              fontSize: '1.2rem'
+            }}>
+              ➕ Nueva Entrada
+            </h3>
+            <NuevoRegistroForm onSuccess={() => {
+              // No recargar todo el inventario, el usuario puede refrescar manualmente si quiere ver el cambio
+              showToast('Entrada registrada correctamente', 'success');
+            }} />
 
               {/* Formulario para subir Excel */}
               <div style={{ 
@@ -458,13 +493,11 @@ const InventarioPage = () => {
                   )}
                 </form>
               </div>
-            </>
-          )}
+          </div>
 
           {/* Formulario de Salida */}
-          {formularioActivo === 'salida' && (
-            <>
-              <h3 style={{ 
+          <div style={{ display: formularioActivo === 'salida' ? 'block' : 'none' }}>
+            <h3 style={{ 
                 marginTop: 0, 
                 marginBottom: 20, 
                 color: '#ff9800',
@@ -542,6 +575,18 @@ const InventarioPage = () => {
                         encargadoId: encargado?.id || '',
                         encargadoNombre: encargado?.nombre || ''
                       });
+                      
+                      // Si el encargado tiene áreas y no hay área seleccionada, autocompletar con la primera área
+                      if (encargado?.areas && encargado.areas.length > 0 && !salidaForm.areaId) {
+                        const primeraArea = encargado.areas[0];
+                        setSalidaForm(prev => ({
+                          ...prev,
+                          areaId: primeraArea.id,
+                          encargadoId: encargado?.id || '',
+                          encargadoNombre: encargado?.nombre || ''
+                        }));
+                        setAreaInput(primeraArea.nombre);
+                      }
                     }}
                     required
                     areaId={salidaForm.areaId}
@@ -613,8 +658,7 @@ const InventarioPage = () => {
                   📤 Registrar Salida
                 </button>
               </form>
-            </>
-          )}
+          </div>
         </div>
 
         {/* COLUMNA DERECHA - Inventario */}

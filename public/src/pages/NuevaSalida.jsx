@@ -108,7 +108,37 @@ const NuevaSalida = () => {
   useEffect(() => {
     if (areaId) {
       (async () => {
-        try { const r = await fetch(`${API}/encargados/area/${areaId}`); let d=null; try { d=await r.json(); } catch {}; if(!r.ok) throw new Error(d?.error || 'Error encargados área'); setFilteredEncargados(Array.isArray(d)? d: []); }
+        try { 
+          const r = await fetch(`${API}/encargados/area/${areaId}`); 
+          let d=null; 
+          try { d=await r.json(); } catch {}; 
+          if(!r.ok) throw new Error(d?.error || 'Error encargados área'); 
+          const encargadosDeArea = Array.isArray(d)? d: [];
+          setFilteredEncargados(encargadosDeArea);
+          
+          // Si solo hay un encargado en esta área, autocompletarlo siempre
+          if (encargadosDeArea.length === 1) {
+            const enc = encargadosDeArea[0];
+            setEncargadoId(enc.id);
+            setEncargadoNombre(enc.nombre);
+            setEncargadoIsNew(false);
+          } else if (encargadosDeArea.length > 1) {
+            // Si hay varios encargados, limpiar si el actual no pertenece al área
+            if (encargadoId) {
+              const perteneceAlArea = encargadosDeArea.some(e => e.id === encargadoId);
+              if (!perteneceAlArea) {
+                setEncargadoId('');
+                setEncargadoNombre('');
+                setEncargadoIsNew(false);
+              }
+            } else if (!encargadoId) {
+              // Si no hay encargado seleccionado, asegurar que esté limpio para mostrar sugerencias
+              setEncargadoId('');
+              setEncargadoNombre('');
+              setEncargadoIsNew(false);
+            }
+          }
+        }
         catch(e){ setFilteredEncargados([]); showToast(e.message,'error'); }
       })();
     } else {
@@ -298,10 +328,17 @@ const NuevaSalida = () => {
         <label>Encargado</label>
         <EncargadoAutocomplete
           value={encargadoNombre}
-          onChange={({ id, nombre, isNew }) => {
+          onChange={({ id, nombre, isNew, areas }) => {
             setEncargadoId(id || '');
             setEncargadoNombre(nombre);
             setEncargadoIsNew(isNew);
+            
+            // Si el encargado tiene áreas y no hay área seleccionada, autocompletar con la primera área
+            if (areas && areas.length > 0 && !areaId) {
+              const primeraArea = areas[0];
+              setAreaId(primeraArea.id);
+              setAreaInput(primeraArea.nombre);
+            }
           }}
           areaId={areaId}
           placeholder="Buscar o escribir encargado..."
