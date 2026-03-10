@@ -4,6 +4,7 @@ import { useToast } from '../context/ToastContext';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import API_URL from '../config/api';
+import * as XLSX from 'xlsx';
 
 const API = `${API_URL}/nota-pedido`;
 
@@ -168,6 +169,25 @@ export default function NotaPedidoSemanal() {
     doc.save(`nota-pedido-${fechaArchivo}.pdf`);
   }
 
+  function descargarExcel() {
+  const datos = items.map((item, idx) => ({
+    '#': idx + 1,
+    'Artículo': item.articulo,
+    'Fecha Agregado': new Date(item.fecha + 'T00:00:00').toLocaleDateString('es-ES')
+  }));
+
+  const hoja = XLSX.utils.json_to_sheet(datos);
+  const libro = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(libro, hoja, 'Nota de Pedido');
+
+  // Ancho de columnas
+  hoja['!cols'] = [{ wch: 5 }, { wch: 40 }, { wch: 18 }];
+
+  const hoy = new Date();
+  const fechaArchivo = `${hoy.getDate()}-${hoy.getMonth()+1}-${hoy.getFullYear()}`;
+  XLSX.writeFile(libro, `nota-pedido-${fechaArchivo}.xlsx`);
+}
+
   return (
     <div style={{ minHeight: '100vh', background: '#f5f5f5', padding: 20 }}>
       {/* Header */}
@@ -234,6 +254,9 @@ export default function NotaPedidoSemanal() {
                 onClick={descargarPDF}
               >
                 📥 Descargar PDF
+              </button>
+              <button className="btn btn-success" onClick={descargarExcel}>
+                  📊 Descargar Excel
               </button>
               <button 
                 className="btn btn-secondary" 

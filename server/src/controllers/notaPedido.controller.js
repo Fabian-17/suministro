@@ -2,15 +2,16 @@ import { NotaPedido } from "../models/notaPedido.js";
 
 // Obtener todos los artículos
 export const obtenerTodos = async (req, res) => {
-    try {
-        const items = await NotaPedido.findAll({
-            order: [['createdAt', 'DESC']]
-        });
-        res.json(items);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Error al obtener artículos' });
-    }
+  try {
+    const items = await NotaPedido.findAll({
+      where: { archivado: false },
+      order: [['createdAt', 'DESC']]
+    });
+    res.json(items);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error al obtener artículos' });
+  }
 };
 
 // Crear un nuevo artículo
@@ -54,11 +55,14 @@ export const eliminar = async (req, res) => {
 
 // Limpiar toda la lista
 export const limpiarTodos = async (req, res) => {
-    try {
-        await NotaPedido.destroy({ where: {} });
-        res.json({ message: 'Lista limpiada exitosamente' });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Error al limpiar lista' });
-    }
+  try {
+    await NotaPedido.update(
+      { archivado: true },
+      { where: { archivado: false } }
+    );
+    res.json({ message: 'Lista archivada exitosamente' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error al archivar lista' });
+  }
 };

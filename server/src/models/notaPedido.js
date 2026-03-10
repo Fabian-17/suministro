@@ -15,7 +15,11 @@ export const NotaPedido = sequelize.define("nota_pedido", {
         type: DataTypes.DATEONLY,
         allowNull: false,
         defaultValue: DataTypes.NOW
-    }
+    },
+    archivado: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false
+  }
 }, {
     timestamps: true,
     tableName: 'nota_pedido'
