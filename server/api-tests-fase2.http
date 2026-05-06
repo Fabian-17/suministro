@@ -1,0 +1,319 @@
+###############################################
+# API de Solicitudes y Notificaciones
+# Sistema de Gestión de Suministros - Fase 2
+# Base URL: http://localhost:3434
+###############################################
+
+### Variables
+@baseUrl = http://localhost:3434
+@tokenAdmin = eyJhbGc...
+@tokenEncargado = eyJhbGc...
+@tokenSolicitante = eyJhbGc...
+@solicitudId = 1
+
+###############################################
+# SETUP: Login con diferentes roles
+###############################################
+
+### 1. Login como Admin
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "admin123"
+}
+
+### 2. Login como Encargado Suministro
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "username": "encargado1",
+  "password": "encargado123"
+}
+
+### 3. Login como Solicitante
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "username": "solicitante1",
+  "password": "solicitante123"
+}
+
+###############################################
+# SOLICITUDES - Como Solicitante
+###############################################
+
+### 4. Crear nueva solicitud
+POST {{baseUrl}}/solicitudes
+Authorization: Bearer {{tokenSolicitante}}
+Content-Type: application/json
+
+{
+  "items": [
+    {
+      "inventarioId": 1,
+      "cantidad": 5
+    },
+    {
+      "inventarioId": 2,
+      "cantidad": 3
+    }
+  ],
+  "observaciones": "Necesario para proyecto urgente del área"
+}
+
+### 5. Ver mis solicitudes
+GET {{baseUrl}}/solicitudes/mis-solicitudes
+Authorization: Bearer {{tokenSolicitante}}
+
+### 6. Ver detalle de mi solicitud
+GET {{baseUrl}}/solicitudes/{{solicitudId}}
+Authorization: Bearer {{tokenSolicitante}}
+
+### 7. Eliminar mi solicitud (solo si está pendiente)
+DELETE {{baseUrl}}/solicitudes/{{solicitudId}}
+Authorization: Bearer {{tokenSolicitante}}
+
+###############################################
+# SOLICITUDES - Como Encargado/Admin
+###############################################
+
+### 8. Ver todas las solicitudes
+GET {{baseUrl}}/solicitudes
+Authorization: Bearer {{tokenEncargado}}
+
+### 9. Ver solicitudes pendientes
+GET {{baseUrl}}/solicitudes/pendientes
+Authorization: Bearer {{tokenEncargado}}
+
+### 10. Ver solicitudes aprobadas (listas para procesar)
+GET {{baseUrl}}/solicitudes/aprobadas
+Authorization: Bearer {{tokenEncargado}}
+
+### 11. Filtrar solicitudes por estado
+GET {{baseUrl}}/solicitudes?estado=pendiente
+Authorization: Bearer {{tokenEncargado}}
+
+### 12. Filtrar por área
+GET {{baseUrl}}/solicitudes?areaId=5
+Authorization: Bearer {{tokenEncargado}}
+
+### 13. Ver detalle de cualquier solicitud
+GET {{baseUrl}}/solicitudes/{{solicitudId}}
+Authorization: Bearer {{tokenEncargado}}
+
+###############################################
+# APROBAR/RECHAZAR SOLICITUDES
+###############################################
+
+### 14. Aprobar solicitud (aprobación total)
+PUT {{baseUrl}}/solicitudes/{{solicitudId}}/aprobar
+Authorization: Bearer {{tokenEncargado}}
+Content-Type: application/json
+
+{
+  "items": [
+    {
+      "id": 1,
+      "cantidad_aprobada": 5
+    },
+    {
+      "id": 2,
+      "cantidad_aprobada": 3
+    }
+  ]
+}
+
+### 15. Aprobar solicitud (aprobación parcial)
+PUT {{baseUrl}}/solicitudes/{{solicitudId}}/aprobar
+Authorization: Bearer {{tokenEncargado}}
+Content-Type: application/json
+
+{
+  "items": [
+    {
+      "id": 1,
+      "cantidad_aprobada": 3
+    },
+    {
+      "id": 2,
+      "cantidad_aprobada": 2
+    }
+  ]
+}
+
+### 16. Rechazar solicitud
+PUT {{baseUrl}}/solicitudes/{{solicitudId}}/rechazar
+Authorization: Bearer {{tokenEncargado}}
+Content-Type: application/json
+
+{
+  "motivo": "Stock insuficiente. Por favor solicitar la próxima semana cuando llegue el pedido."
+}
+
+###############################################
+# PROCESAR SOLICITUDES (Generar Salidas)
+###############################################
+
+### 17. Procesar solicitud aprobada (fecha actual)
+POST {{baseUrl}}/solicitudes/{{solicitudId}}/procesar
+Authorization: Bearer {{tokenEncargado}}
+Content-Type: application/json
+
+{}
+
+### 18. Procesar solicitud con fecha específica
+POST {{baseUrl}}/solicitudes/{{solicitudId}}/procesar
+Authorization: Bearer {{tokenEncargado}}
+Content-Type: application/json
+
+{
+  "fecha": "2026-05-06"
+}
+
+###############################################
+# NOTIFICACIONES
+###############################################
+
+### 19. Ver notificaciones no leídas
+GET {{baseUrl}}/notificaciones/no-leidas
+Authorization: Bearer {{tokenSolicitante}}
+
+### 20. Ver todas las notificaciones (últimas 50)
+GET {{baseUrl}}/notificaciones
+Authorization: Bearer {{tokenSolicitante}}
+
+### 21. Ver notificaciones con límite personalizado
+GET {{baseUrl}}/notificaciones?limite=20
+Authorization: Bearer {{tokenSolicitante}}
+
+### 22. Contador de notificaciones no leídas
+GET {{baseUrl}}/notificaciones/contador
+Authorization: Bearer {{tokenSolicitante}}
+
+### 23. Marcar notificación como leída
+PUT {{baseUrl}}/notificaciones/1/leer
+Authorization: Bearer {{tokenSolicitante}}
+
+### 24. Marcar todas las notificaciones como leídas
+PUT {{baseUrl}}/notificaciones/leer-todas
+Authorization: Bearer {{tokenSolicitante}}
+
+### 25. Eliminar notificación
+DELETE {{baseUrl}}/notificaciones/1
+Authorization: Bearer {{tokenSolicitante}}
+
+###############################################
+# VALIDACIONES Y CASOS DE ERROR
+###############################################
+
+### 26. Crear solicitud sin items (debe fallar)
+POST {{baseUrl}}/solicitudes
+Authorization: Bearer {{tokenSolicitante}}
+Content-Type: application/json
+
+{
+  "items": [],
+  "observaciones": "Esto debería fallar"
+}
+
+### 27. Crear solicitud con cantidad negativa (debe fallar)
+POST {{baseUrl}}/solicitudes
+Authorization: Bearer {{tokenSolicitante}}
+Content-Type: application/json
+
+{
+  "items": [
+    {
+      "inventarioId": 1,
+      "cantidad": -5
+    }
+  ]
+}
+
+### 28. Aprobar con cantidad mayor a la solicitada (debe fallar)
+PUT {{baseUrl}}/solicitudes/{{solicitudId}}/aprobar
+Authorization: Bearer {{tokenEncargado}}
+Content-Type: application/json
+
+{
+  "items": [
+    {
+      "id": 1,
+      "cantidad_aprobada": 1000
+    }
+  ]
+}
+
+### 29. Solicitante intenta aprobar (debe fallar - sin permisos)
+PUT {{baseUrl}}/solicitudes/{{solicitudId}}/aprobar
+Authorization: Bearer {{tokenSolicitante}}
+Content-Type: application/json
+
+{
+  "items": [
+    {
+      "id": 1,
+      "cantidad_aprobada": 5
+    }
+  ]
+}
+
+### 30. Procesar solicitud pendiente (debe fallar - solo aprobadas)
+POST {{baseUrl}}/solicitudes/{{solicitudId}}/procesar
+Authorization: Bearer {{tokenEncargado}}
+
+### 31. Rechazar sin motivo (debe fallar)
+PUT {{baseUrl}}/solicitudes/{{solicitudId}}/rechazar
+Authorization: Bearer {{tokenEncargado}}
+Content-Type: application/json
+
+{
+  "motivo": ""
+}
+
+###############################################
+# FLUJO COMPLETO DE PRUEBA
+###############################################
+
+### PASO 1: Crear usuario solicitante (como admin)
+# POST {{baseUrl}}/usuarios
+# Body: { username, password, rol: "solicitante", encargadoId }
+
+### PASO 2: Login como solicitante y guardar token
+
+### PASO 3: Crear solicitud
+# POST {{baseUrl}}/solicitudes
+# → Se emite evento Socket.io a encargados
+
+### PASO 4: Login como encargado y ver pendientes
+# GET {{baseUrl}}/solicitudes/pendientes
+
+### PASO 5: Aprobar solicitud
+# PUT {{baseUrl}}/solicitudes/:id/aprobar
+# → Se notifica al solicitante
+
+### PASO 6: Ver notificaciones como solicitante
+# GET {{baseUrl}}/notificaciones/no-leidas
+# → Debe aparecer notificación de aprobación
+
+### PASO 7: Procesar solicitud como encargado
+# POST {{baseUrl}}/solicitudes/:id/procesar
+# → Genera salidas automáticamente
+# → Actualiza inventario
+# → Notifica al solicitante
+
+### PASO 8: Verificar salidas generadas
+# GET {{baseUrl}}/salidas
+# → Deben aparecer salidas con solicitudId
+
+### PASO 9: Verificar inventario actualizado
+# GET {{baseUrl}}/inventarios
+# → Cantidad debe haber disminuido
+
+### PASO 10: Solicitante ve solicitud procesada
+# GET {{baseUrl}}/solicitudes/mis-solicitudes
+# → Estado: "procesada"

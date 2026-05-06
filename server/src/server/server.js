@@ -1,8 +1,10 @@
 import express from 'express';
+import { createServer } from 'http';
 import cors from 'cors';
 import morgan from 'morgan';
 import helmet from 'helmet';
 import { connectDB } from '../config/connection.js';
+import { initializeSocket } from '../config/socket.js';
 import router from '../routers/index.route.js';
 import { config } from 'dotenv';
 import path from 'path';
@@ -11,6 +13,7 @@ import { fileURLToPath } from 'url';
 config();
 
 const app = express();
+const httpServer = createServer(app);
 const PORT = process.env.PORT || 3434;
 
 
@@ -58,11 +61,26 @@ app.use(router);
 // Start server
 export const startServer = async () => {
     try {
+        // Conectar a la base de datos
         await connectDB();
-        app.listen(PORT, () => {
-            console.log(`Server is running on port ${PORT}`);
+        
+        // Inicializar Socket.io
+        const io = initializeSocket(httpServer);
+        
+        // Guardar instancia de io en app para usar en controladores
+        app.set('io', io);
+        
+        // Iniciar servidor HTTP
+        httpServer.listen(PORT, () => {
+            console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+            console.log(`🚀 Servidor iniciado en puerto ${PORT}`);
+            console.log(`📡 API disponible en: http://localhost:${PORT}`);
+            console.log(`🔌 Socket.io inicializado correctamente`);
+            console.log(`🌐 CORS habilitado para: ${process.env.FRONTEND_URL || 'http://localhost:5173'}`);
+            console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
         });
     } catch (error) {
-        console.error('Error starting server:', error);
+        console.error('❌ Error al iniciar el servidor:', error);
+        process.exit(1);
     }
 };
