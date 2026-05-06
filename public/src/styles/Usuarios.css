@@ -1,0 +1,160 @@
+.usuarios-container {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.usuarios-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.usuarios-header h1 {
+  margin: 0;
+  color: #333;
+}
+
+.usuarios-tabla {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.usuarios-tabla table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.usuarios-tabla th {
+  background: #667eea;
+  color: white;
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+}
+
+.usuarios-tabla td {
+  padding: 1rem;
+  border-bottom: 1px solid #eee;
+}
+
+.usuarios-tabla tr:hover {
+  background-color: #f9f9f9;
+}
+
+.usuarios-tabla tr.usuario-inactivo {
+  opacity: 0.6;
+}
+
+.badge-admin {
+  background: #ff9800;
+  color: white;
+}
+
+.badge-encargado {
+  background: #2196f3;
+  color: white;
+}
+
+.badge-solicitante {
+  background: #4caf50;
+  color: white;
+}
+
+.estado-activo {
+  color: #4caf50;
+  font-weight: 600;
+}
+
+.estado-inactivo {
+  color: #f44336;
+  font-weight: 600;
+}
+
+.acciones {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.btn-editar,
+.btn-desactivar,
+.btn-activar {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.2rem;
+  padding: 0.25rem 0.5rem;
+  transition: transform 0.2s;
+}
+
+.btn-editar:hover,
+.btn-desactivar:hover,
+.btn-activar:hover {
+  transform: scale(1.2);
+}
+
+.btn-editar:disabled,
+.btn-desactivar:disabled,
+.btn-activar:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.usuario-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group label {
+  font-weight: 600;
+  color: #333;
+}
+
+.form-group input,
+.form-group select {
+  padding: 0.75rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: border-color 0.3s;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.form-group input[type='checkbox'] {
+  width: auto;
+  margin-right: 0.5rem;
+}
+
+@media (max-width: 768px) {
+  .usuarios-container {
+    padding: 1rem;
+  }
+
+  .usuarios-tabla {
+    overflow-x: auto;
+  }
+
+  .usuarios-tabla table {
+    font-size: 0.85rem;
+  }
+
+  .usuarios-tabla th,
+  .usuarios-tabla td {
+    padding: 0.5rem;
+  }
+}

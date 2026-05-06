@@ -1,0 +1,158 @@
+.notificaciones-container {
+  position: relative;
+}
+
+.notificaciones-btn {
+  position: relative;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  transition: transform 0.2s;
+}
+
+.notificaciones-btn:hover {
+  transform: scale(1.1);
+}
+
+.notificaciones-btn .badge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background-color: #f44336;
+  color: white;
+  font-size: 0.7rem;
+  font-weight: bold;
+  padding: 0.15rem 0.35rem;
+  border-radius: 10px;
+  min-width: 18px;
+  text-align: center;
+}
+
+.notificaciones-panel {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 0.5rem;
+  width: 380px;
+  max-height: 500px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+}
+
+.panel-header {
+  padding: 1rem;
+  border-bottom: 1px solid #e0e0e0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.panel-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #333;
+}
+
+.btn-marcar-todas {
+  background: none;
+  border: none;
+  color: #667eea;
+  font-size: 0.85rem;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+}
+
+.btn-marcar-todas:hover {
+  text-decoration: underline;
+}
+
+.panel-body {
+  overflow-y: auto;
+  max-height: 440px;
+}
+
+.panel-loading,
+.panel-empty {
+  padding: 2rem;
+  text-align: center;
+  color: #999;
+}
+
+.notificaciones-lista {
+  display: flex;
+  flex-direction: column;
+}
+
+.notificacion-item {
+  display: flex;
+  gap: 0.75rem;
+  padding: 1rem;
+  border-bottom: 1px solid #f0f0f0;
+  transition: background-color 0.2s;
+}
+
+.notificacion-item:hover {
+  background-color: #f9f9f9;
+}
+
+.notif-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.notif-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.notif-titulo {
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 0.25rem;
+}
+
+.notif-mensaje {
+  font-size: 0.9rem;
+  color: #666;
+  margin-bottom: 0.5rem;
+  word-wrap: break-word;
+}
+
+.notif-fecha {
+  font-size: 0.75rem;
+  color: #999;
+}
+
+.btn-marcar-leida {
+  background: none;
+  border: none;
+  color: #667eea;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  flex-shrink: 0;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.notificacion-item:hover .btn-marcar-leida {
+  opacity: 1;
+}
+
+.btn-marcar-leida:hover {
+  color: #4c51bf;
+}
+
+@media (max-width: 768px) {
+  .notificaciones-panel {
+    width: 90vw;
+    max-width: 380px;
+    right: -50px;
+  }
+}

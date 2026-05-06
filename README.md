@@ -1,202 +1,301 @@
-# 📦 Sistema de Gestión de Suministros
+# � Sistema de Gestión de Suministros con Autenticación Multi-Usuario
 
-Sistema web para gestión de inventario, entradas y salidas de suministros con generación de reportes PDF.
+Sistema completo de gestión de inventario, entradas, salidas y **solicitudes con aprobación** para administración municipal. Incluye autenticación JWT, roles (admin, encargado, solicitante) y **notificaciones en tiempo real** con Socket.io.
 
-## 🚀 Características
+---
 
-- ✅ Gestión de inventario de artículos
-- ✅ Registro de entradas de mercancía
-- ✅ Registro de salidas con destinatario y área
-- ✅ Generación de reportes PDF agrupados por área y destinatario
-- ✅ Gestión de encargados por área
-- ✅ Interfaz responsive y moderna
+## ✨ Características Principales
 
-## 🛠️ Tecnologías
+### **Sistema Base (Existente)**
+- ✅ Gestión de inventario (414 artículos)
+- ✅ Control de entradas
+- ✅ Control de salidas
+- ✅ Gestión de encargados y áreas
+- ✅ Notas de pedido semanal
+- ✅ Exportación a Excel
 
-### Frontend
-- React 19
-- React Router DOM
-- Vite
-- jsPDF (generación de PDFs)
+### **Nuevas Funcionalidades (Fases 1, 2 y 3)**
 
-### Backend
-- Node.js
-- Express 5
-- Sequelize ORM
-- MySQL
-- Helmet (seguridad)
-- CORS
+#### **🔐 Autenticación y Usuarios**
+- ✅ Login con JWT (tokens en sessionStorage)
+- ✅ 3 roles: Admin, Encargado Suministro, Solicitante
+- ✅ Gestión completa de usuarios (CRUD)
+- ✅ Protección de rutas por rol
+- ✅ Activar/Desactivar usuarios
 
-## 📋 Requisitos Previos
+#### **📦 Sistema de Solicitudes**
+- ✅ Crear solicitudes con validación de stock
+- ✅ Aprobar solicitudes (total o parcialmente)
+- ✅ Rechazar solicitudes con motivo
+- ✅ Procesar solicitudes → **Genera salidas automáticamente**
+- ✅ Estados: Pendiente → Aprobada → Procesada
+- ✅ Vincular solicitudes con salidas
 
-- Node.js >= 18
-- MySQL >= 8.0
-- npm o yarn
+#### **🔔 Notificaciones en Tiempo Real**
+- ✅ Socket.io con autenticación JWT
+- ✅ Notificaciones instantáneas
+- ✅ Persistencia en base de datos
+- ✅ Badge con contador
+- ✅ Panel dropdown elegante
+- ✅ Notificaciones del navegador
 
-## 🔧 Instalación
+---
 
-### 1. Clonar el repositorio
+## 🛠 Tecnologías
+
+### **Backend**
+- Node.js + Express 5.1.0
+- MySQL 10.4.32 (MariaDB)
+- Sequelize 6.37.7 (ORM)
+- JWT (jsonwebtoken 9.0.3)
+- bcryptjs 3.0.3
+- Socket.io 4.8.3 (WebSocket)
+- Helmet, CORS, express-validator
+
+### **Frontend**
+- React 19.1.0
+- React Router DOM 7.8.2
+- Vite 7.0.4
+- Socket.io Client 4.8.3
+- CSS modules
+
+---
+
+## 📦 Requisitos Previos
+
+- Node.js 18+ y npm
+- MySQL/MariaDB 10.4+
+- Git (opcional)
+
+---
+
+## 🚀 Instalación
+
+### **1. Clonar/Descargar el proyecto**
 ```bash
-git clone <url-del-repo>
-cd suministro
+cd C:\Users\Usuario\Desktop\suministro
 ```
 
-### 2. Configurar Base de Datos
-```bash
-# Importar el schema
-mysql -u root -p < suministro.sql
-```
-
-### 3. Configurar Backend
+### **2. Instalar dependencias del BACKEND**
 ```bash
 cd server
 npm install
-
-# Crear archivo .env
-cp .env.example .env
-# Editar .env con tus credenciales de MySQL
 ```
 
-### 4. Configurar Frontend
+### **3. Instalar dependencias del FRONTEND**
 ```bash
-cd ../public
+cd ..\public
 npm install
-
-# Crear archivo .env
-cp .env.example .env
-# Editar .env con la URL de tu API
 ```
 
-**Archivo `.env` para desarrollo local:**
+---
+
+## ⚙ Configuración
+
+### **Paso 1: Base de Datos**
+
+#### **Ejecutar migraciones SQL (EN ORDEN):**
+
+Acceder a MySQL y ejecutar manualmente:
+```bash
+cd server/migrations
+```
+
+1. `001_crear_tabla_usuarios.sql` → Tabla de usuarios con roles
+2. `002_crear_tabla_solicitudes.sql` → Tabla de solicitudes
+3. `003_crear_tabla_solicitud_items.sql` → Items de solicitudes
+4. `004_modificar_tabla_salida.sql` → Añade FK a salidas
+5. `005_crear_tabla_notificaciones.sql` → Notificaciones
+6. `006_crear_usuario_admin_inicial.sql` → Usuario admin por defecto
+
+### **Paso 2: Variables de Entorno**
+
+#### **Backend** (`server/.env`):
+```env
+# Base de datos
+DB_HOST=localhost
+DB_NAME=suministro_db
+DB_USER=root
+DB_PASSWORD=
+
+# JWT
+JWT_SECRET=mi_secreto_super_seguro_cambiar_en_produccion_2026
+
+# Frontend
+FRONTEND_URL=http://localhost:5173
+```
+
+#### **Frontend** (`public/.env` - Opcional):
 ```env
 VITE_API_URL=http://localhost:3434
 ```
 
-**Archivo `.env` para producción:**
-```env
-VITE_API_URL=https://tu-dominio.com/api
-```
+---
 
-## 🚀 Ejecución
+## ▶ Ejecución
 
-### Desarrollo Local
-
-#### Backend
-```bash
-cd server
-npm run dev  # Modo desarrollo con nodemon
-```
-El servidor estará disponible en `http://localhost:3434`
-
-#### Frontend
-```bash
-cd public
-npm run dev  # Modo desarrollo
-```
-La aplicación estará disponible en `http://localhost:5173`
-
-### Producción
-
-#### Backend
+### **Terminal 1: Backend**
 ```bash
 cd server
 npm start
 ```
 
-#### Frontend
+### **Terminal 2: Frontend**
 ```bash
 cd public
-npm run build
-npm run preview
+npm run dev
 ```
 
-### 🌐 Despliegue en Línea
+**Abrirá en:** http://localhost:5173
 
-Para desplegar la aplicación en un servidor:
+---
 
-1. **Backend**: 
-   - Actualiza el archivo `.env` con las credenciales de producción
-   - Cambia `NODE_ENV=production`
-   - Actualiza el `origin` en CORS a la URL de tu frontend en producción
-   
-2. **Frontend**:
-   - Actualiza `VITE_API_URL` en `.env` con la URL de tu API en producción
-   - Genera el build: `npm run build`
-   - Despliega la carpeta `dist/` en tu servidor web
+## 👥 Usuarios por Defecto
 
-3. **Base de Datos**:
-   - Asegúrate de que tu base de datos MySQL esté accesible desde el servidor
-   - Configura las reglas de firewall adecuadas
+| Usuario | Contraseña | Rol |
+|---------|------------|-----|
+| **admin** | admin123 | Admin |
 
-## 📁 Estructura del Proyecto
+**Crear más usuarios:**
+1. Login como admin
+2. Ir a **Usuarios** → **+ Nuevo Usuario**
+
+---
+
+## 📂 Estructura del Proyecto
 
 ```
 suministro/
-├── server/                 # Backend (Node.js + Express)
+├── server/                    # Backend Node.js
+│   ├── migrations/            # ⭐ Migraciones SQL
 │   ├── src/
-│   │   ├── config/        # Configuración DB
-│   │   ├── controllers/   # Controladores
-│   │   ├── models/        # Modelos Sequelize
-│   │   ├── routes/        # Rutas API
-│   │   ├── services/      # Lógica de negocio
-│   │   └── server/        # Configuración servidor
-│   └── index.js
+│   │   ├── config/           # DB, Socket.io
+│   │   ├── controllers/      # Lógica de endpoints
+│   │   ├── middlewares/      # Auth JWT
+│   │   ├── models/           # Sequelize models
+│   │   ├── routers/          # Rutas Express
+│   │   ├── services/         # Lógica de negocio
+│   │   └── server/           # Servidor
+│   └── .env
 │
-├── public/                # Frontend (React + Vite)
+├── public/                   # Frontend React
 │   ├── src/
-│   │   ├── components/    # Componentes reutilizables
-│   │   ├── context/       # Context API
-│   │   ├── hooks/         # Custom hooks
-│   │   ├── pages/         # Páginas/Vistas
-│   │   ├── routes/        # Configuración rutas
-│   │   └── styles/        # Estilos globales
-│   └── index.html
+│   │   ├── context/         # Auth, Socket
+│   │   ├── components/      # Navbar, Notificaciones
+│   │   ├── pages/           # Login, Solicitudes, Usuarios
+│   │   ├── routes/          # AppRoutes
+│   │   └── styles/          # CSS
+│   └── .env
 │
-└── suministro.sql         # Schema de base de datos
+├── FASE_1_COMPLETADA.md     # 📄 Docs Fase 1
+├── FASE_2_COMPLETADA.md     # 📄 Docs Fase 2
+├── FASE_3_COMPLETADA.md     # 📄 Docs Fase 3
+└── README.md                # 📄 Este archivo
 ```
 
-## 🐛 Problemas Conocidos y Soluciones
+---
 
-### Error: "grupos[area][destinatario].map is not a function"
-✅ **Solucionado**: Se corrigió la estructura de agrupación en reportes.
+## 🔄 Flujos de Trabajo
 
-## 📝 API Endpoints
+### **Flujo 1: Solicitante crea solicitud**
+```
+Login → Nueva Solicitud → Buscar productos → Agregar cantidades → Enviar
+→ Encargados reciben notificación 🔔
+```
 
-### Inventario
-- `GET /inventarios` - Obtener todo el inventario
-- `POST /inventarios` - Crear artículo
-- `PUT /inventarios/:id` - Actualizar artículo
+### **Flujo 2: Encargado aprueba**
+```
+Notificación 🔔 → Solicitudes Pendientes → Aprobar → Modificar cantidades
+→ Solicitante recibe notificación ⚡
+```
 
-### Entradas
-- `GET /entradas` - Obtener todas las entradas
-- `POST /entradas` - Registrar entrada
+### **Flujo 3: Encargado procesa**
+```
+Solicitudes Aprobadas → Procesar → Seleccionar fecha
+→ Genera salidas automáticamente
+→ Actualiza inventario
+→ Solicitante recibe notificación ⚡
+```
 
-### Salidas
-- `GET /salidas` - Obtener todas las salidas
-- `POST /salidas` - Registrar salida
-- `PUT /salidas/:id` - Actualizar salida
+---
 
-### Áreas
-- `GET /areas` - Obtener áreas
-- `POST /areas` - Crear área
+## 🔌 API Endpoints
 
-### Encargados
-- `GET /encargados` - Obtener encargados
-- `POST /encargados` - Crear encargado
+### **Autenticación** (`/auth`)
+- `POST /auth/login` - Login
+- `GET /auth/me` - Verificar token
+- `PUT /auth/cambiar-password` - Cambiar contraseña
 
-## 🤝 Contribución
+### **Usuarios** (`/usuarios`) - Admin
+- `GET /usuarios` - Listar
+- `POST /usuarios` - Crear
+- `PUT /usuarios/:id` - Actualizar
+- `DELETE /usuarios/:id` - Desactivar
 
-1. Fork el proyecto
-2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
-3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
-4. Push a la rama (`git push origin feature/AmazingFeature`)
-5. Abre un Pull Request
+### **Solicitudes** (`/solicitudes`)
+- `POST /solicitudes` - Crear
+- `GET /solicitudes/mis-solicitudes` - Ver propias
+- `GET /solicitudes/pendientes` - Ver pendientes (Encargado)
+- `PUT /solicitudes/:id/aprobar` - Aprobar (Encargado)
+- `POST /solicitudes/:id/procesar` - Procesar (Encargado)
 
-## 📄 Licencia
+### **Notificaciones** (`/notificaciones`)
+- `GET /notificaciones/no-leidas` - Ver no leídas
+- `GET /notificaciones/contador` - Contador
+- `PUT /notificaciones/:id/leer` - Marcar leída
 
-Este proyecto es de uso interno.
+Ver **`api-tests-fase1.http`** y **`api-tests-fase2.http`** para ejemplos.
 
-## ✨ Mejoras Futuras
+---
+
+## 📱 Eventos Socket.io
+
+### **Servidor → Cliente**
+- `solicitud:nueva` - Nueva solicitud (a encargados)
+- `solicitud:aprobada` - Aprobada (a solicitante)
+- `solicitud:rechazada` - Rechazada (a solicitante)
+- `solicitud:procesada` - Procesada (a solicitante)
+- `notificacion:nueva` - Nueva notificación
+
+---
+
+## 📚 Documentación Completa
+
+- **[FASE_1_COMPLETADA.md](./server/FASE_1_COMPLETADA.md)** - Backend: Auth y Usuarios
+- **[FASE_2_COMPLETADA.md](./server/FASE_2_COMPLETADA.md)** - Backend: Solicitudes y Notificaciones
+- **[FASE_3_COMPLETADA.md](./FASE_3_COMPLETADA.md)** - Frontend: React UI
+
+---
+
+## 🐛 Solución de Problemas
+
+### **Backend no arranca**
+```bash
+netstat -ano | findstr :3434  # Verificar puerto
+mysql -u root -p             # Verificar MySQL
+```
+
+### **Socket.io no conecta**
+1. Verificar backend corriendo
+2. Abrir consola navegador (F12)
+3. Verificar CORS en `server.js`
+
+### **Token inválido**
+1. Cerrar sesión
+2. Limpiar sessionStorage (F12)
+3. Volver a iniciar sesión
+
+---
+
+## 🎉 ¡Sistema Completo!
+
+✅ Autenticación multi-usuario  
+✅ Sistema de solicitudes  
+✅ Notificaciones en tiempo real  
+✅ Generación automática de salidas  
+✅ UI moderna y responsive  
+
+**¡Listo para producción!** 🚀
 
 - [ ] Autenticación de usuarios
 - [ ] Historial de cambios
