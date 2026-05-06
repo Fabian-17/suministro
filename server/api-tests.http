@@ -1,0 +1,163 @@
+###############################################
+# API de Autenticación y Usuarios
+# Sistema de Gestión de Suministros
+# Base URL: http://localhost:3434
+###############################################
+
+### Variables
+@baseUrl = http://localhost:3434
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+###############################################
+# AUTENTICACIÓN
+###############################################
+
+### 1. Login - Obtener token
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "admin123"
+}
+
+### 2. Obtener información del usuario actual
+GET {{baseUrl}}/auth/me
+Authorization: Bearer {{token}}
+
+### 3. Cambiar contraseña
+PUT {{baseUrl}}/auth/cambiar-password
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "passwordActual": "admin123",
+  "passwordNueva": "nuevaPassword123"
+}
+
+### 4. Logout
+POST {{baseUrl}}/auth/logout
+Authorization: Bearer {{token}}
+
+###############################################
+# GESTIÓN DE USUARIOS (Solo Admin)
+###############################################
+
+### 5. Listar todos los usuarios
+GET {{baseUrl}}/usuarios
+Authorization: Bearer {{token}}
+
+### 6. Obtener usuario por ID
+GET {{baseUrl}}/usuarios/1
+Authorization: Bearer {{token}}
+
+### 7. Obtener usuarios por rol
+GET {{baseUrl}}/usuarios/rol/solicitante
+Authorization: Bearer {{token}}
+
+### 8. Crear nuevo usuario - Admin
+POST {{baseUrl}}/usuarios
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "username": "admin2",
+  "password": "admin123",
+  "rol": "admin"
+}
+
+### 9. Crear nuevo usuario - Encargado Suministro
+POST {{baseUrl}}/usuarios
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "username": "encargado1",
+  "password": "encargado123",
+  "rol": "encargado_suministro"
+}
+
+### 10. Crear nuevo usuario - Solicitante (vinculado a encargado)
+POST {{baseUrl}}/usuarios
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "username": "solicitante1",
+  "password": "solicitante123",
+  "rol": "solicitante",
+  "encargadoId": 1
+}
+
+### 11. Actualizar usuario
+PUT {{baseUrl}}/usuarios/2
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "username": "encargado_actualizado",
+  "activo": true
+}
+
+### 12. Actualizar contraseña de usuario (como admin)
+PUT {{baseUrl}}/usuarios/2
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "password": "nuevaPassword123"
+}
+
+### 13. Activar usuario
+PUT {{baseUrl}}/usuarios/2/activar
+Authorization: Bearer {{token}}
+
+### 14. Desactivar usuario
+DELETE {{baseUrl}}/usuarios/2
+Authorization: Bearer {{token}}
+
+###############################################
+# PRUEBAS DE AUTORIZACIÓN
+###############################################
+
+### 15. Intento de acceso sin token (debe fallar)
+GET {{baseUrl}}/usuarios
+
+### 16. Intento de acceso con token inválido (debe fallar)
+GET {{baseUrl}}/usuarios
+Authorization: Bearer token_invalido
+
+### 17. Login con credenciales incorrectas (debe fallar)
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "contraseña_incorrecta"
+}
+
+###############################################
+# FLUJO COMPLETO DE PRUEBA
+###############################################
+
+### Paso 1: Login como admin
+# POST {{baseUrl}}/auth/login
+# Guardar el token en la variable @token
+
+### Paso 2: Ver mi perfil
+# GET {{baseUrl}}/auth/me
+
+### Paso 3: Crear usuario encargado
+# POST {{baseUrl}}/usuarios (rol: encargado_suministro)
+
+### Paso 4: Crear usuario solicitante vinculado a un encargado
+# POST {{baseUrl}}/usuarios (rol: solicitante, encargadoId: X)
+
+### Paso 5: Listar todos los usuarios
+# GET {{baseUrl}}/usuarios
+
+### Paso 6: Cambiar mi contraseña
+# PUT {{baseUrl}}/auth/cambiar-password
+
+### Paso 7: Logout
+# POST {{baseUrl}}/auth/logout
