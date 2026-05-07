@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 
 /**
- * Hook personalizado para hacer fetch de datos
+ * Hook personalizado para hacer fetch de datos con autenticación
  * @param {string} url - URL del endpoint
  * @param {object} options - Opciones del fetch
  * @returns {object} { data, loading, error, refetch }
@@ -15,7 +15,18 @@ export const useFetch = (url, options = {}) => {
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch(url, options);
+      
+      // Incluir token JWT automáticamente
+      const token = sessionStorage.getItem('token');
+      const headers = {
+        ...options.headers,
+        ...(token && { 'Authorization': `Bearer ${token}` })
+      };
+      
+      const response = await fetch(url, {
+        ...options,
+        headers
+      });
       
       if (!response.ok) {
         throw new Error(`Error ${response.status}: ${response.statusText}`);

@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import API_URL from '../config/api';
+import { fetchWithAuth } from '../utils/fetchHelpers';
 
 const EntradasPage = () => {
   const [entradas, setEntradas] = useState([]);
@@ -21,7 +22,7 @@ const EntradasPage = () => {
     formData.append('file', file);
     setUploading(true);
     try {
-      const res = await fetch(`${API_URL}/entradas/upload`, {
+      const res = await fetchWithAuth(`${API_URL}/entradas/upload`, {
         method: 'POST',
         body: formData
       });
@@ -29,7 +30,7 @@ const EntradasPage = () => {
       if (!res.ok) throw new Error(data.error || 'Error al subir archivo');
       setUploadMsg('Archivo procesado correctamente.');
       // Recargar entradas
-      fetch(`${API_URL}/entradas`)
+      fetchWithAuth(`${API_URL}/entradas`)
         .then(r => r.json())
         .then(data => {
           const entradasArray = Array.isArray(data) ? data : [];
@@ -45,7 +46,7 @@ const EntradasPage = () => {
   };
 
   useEffect(() => {
-    fetch(`${API_URL}/entradas`)
+    fetchWithAuth(`${API_URL}/entradas`)
       .then(r => r.json())
       .then(data => {
         const entradasArray = Array.isArray(data) ? data : [];

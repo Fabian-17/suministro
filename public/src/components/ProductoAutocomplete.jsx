@@ -4,6 +4,7 @@ import API_URL from '../config/api';
 const ProductoAutocomplete = ({ 
   value, 
   onChange, 
+  onProductoSeleccionado, // Nuevo: para compatibilidad con NuevaSolicitudPage
   required = false, 
   validateExists = false,
   placeholder = "Buscar producto...",
@@ -42,7 +43,12 @@ const ProductoAutocomplete = ({
     searchTimeoutRef.current = setTimeout(async () => {
       setLoading(true);
       try {
-        const res = await fetch(`${API_URL}/inventarios/search?q=${encodeURIComponent(searchTerm.trim())}`);
+        const token = sessionStorage.getItem('token');
+        const res = await fetch(`${API_URL}/inventarios/search?q=${encodeURIComponent(searchTerm.trim())}`, {
+          headers: {
+            ...(token && { 'Authorization': `Bearer ${token}` })
+          }
+        });
         const data = await res.json();
         setSuggestions(Array.isArray(data) ? data.slice(0, 10) : []);
         setShowSuggestions(true);
@@ -63,9 +69,23 @@ const ProductoAutocomplete = ({
 
   const handleSelectProduct = (product) => {
     setSelectedProduct(product);
-    setSearchTerm(product.articulo);
     setShowSuggestions(false);
-    onChange(product);
+    
+    // Llamar a onChange si existe (uso normal)
+    if (onChange) {
+      onChange(product);
+    }
+    
+    // Llamar a onProductoSeleccionado si existe (para NuevaSolicitudPage)
+    if (onProductoSeleccionado) {
+      onProductoSeleccionado(product);
+      // Limpiar el input después de seleccionar para agregar otro
+      setSearchTerm('');
+      setSelectedProduct(null);
+    } else {
+      // Solo actualizar el término de búsqueda si NO es modo onProductoSeleccionado
+      setSearchTerm(product.articulo);
+    }
   };
 
   const handleInputChange = (e) => {
@@ -75,11 +95,13 @@ const ProductoAutocomplete = ({
     // Si se borra o cambia, limpiar selección
     if (selectedProduct && newValue !== selectedProduct.articulo) {
       setSelectedProduct(null);
-      onChange(null);
+      if (onChange) {
+        onChange(null);
+      }
     }
     
     // Si no se requiere validación, permitir texto libre
-    if (!validateExists) {
+    if (!validateExists && onChange) {
       onChange({ articulo: newValue, id: null });
     }
   };
@@ -89,7 +111,9 @@ const ProductoAutocomplete = ({
     if (validateExists && !selectedProduct && searchTerm) {
       setTimeout(() => {
         setSearchTerm('');
-        onChange(null);
+        if (onChange) {
+          onChange(null);
+        }
       }, 200);
     }
   };

@@ -6,6 +6,7 @@ import ProtectedRoute from '../components/ProtectedRoute';
 import Loading from '../components/Loading';
 
 // Páginas existentes
+import HomePage from '../pages/HomePage';
 import InventarioPage from '../pages/InventarioPage';
 import EntradasPage from '../pages/EntradasPage';
 import SalidasPage from '../pages/SalidasPage';
@@ -38,19 +39,21 @@ const AppRoutes = () => {
           element={estaAutenticado ? <Navigate to="/" replace /> : <LoginPage />}
         />
 
-        {/* Rutas protegidas para todos los usuarios autenticados */}
+        {/* Página principal - Dashboard diferente según rol */}
         <Route
           path="/"
           element={
             <ProtectedRoute>
-              <InventarioPage />
+              <HomePage />
             </ProtectedRoute>
           }
         />
+
+        {/* Entradas, Salidas - Solo encargados y admins */}
         <Route
           path="/entradas"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute rolesPermitidos={['admin', 'encargado_suministro']}>
               <EntradasPage />
             </ProtectedRoute>
           }
@@ -58,7 +61,7 @@ const AppRoutes = () => {
         <Route
           path="/salidas"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute rolesPermitidos={['admin', 'encargado_suministro']}>
               <SalidasPage />
             </ProtectedRoute>
           }
@@ -66,7 +69,7 @@ const AppRoutes = () => {
         <Route
           path="/nueva-salida"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute rolesPermitidos={['admin', 'encargado_suministro']}>
               <NuevaSalida />
             </ProtectedRoute>
           }
@@ -74,7 +77,7 @@ const AppRoutes = () => {
         <Route
           path="/encargados-area"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute rolesPermitidos={['admin', 'encargado_suministro']}>
               <EncargadosArea />
             </ProtectedRoute>
           }
@@ -82,7 +85,7 @@ const AppRoutes = () => {
         <Route
           path="/nota-pedido-semanal"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute rolesPermitidos={['admin', 'encargado_suministro']}>
               <NotaPedidoSemanal />
             </ProtectedRoute>
           }

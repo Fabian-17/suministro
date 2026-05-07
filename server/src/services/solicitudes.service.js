@@ -289,7 +289,14 @@ export const aprobarSolicitud = async (solicitudId, itemsAprobados, aprobadoPorI
     const transaction = await sequelize.transaction();
     
     try {
-        const solicitud = await Solicitudes.findByPk(solicitudId);
+        const solicitud = await Solicitudes.findByPk(solicitudId, {
+            include: [
+                {
+                    model: SolicitudItems,
+                    as: 'items'
+                }
+            ]
+        });
 
         if (!solicitud) {
             throw new Error('Solicitud no encontrada');
@@ -303,8 +310,13 @@ export const aprobarSolicitud = async (solicitudId, itemsAprobados, aprobadoPorI
         for (const itemAprobado of itemsAprobados) {
             const item = await SolicitudItems.findByPk(itemAprobado.id);
             
-            if (!item || item.solicitudId !== solicitudId) {
-                throw new Error(`Item ${itemAprobado.id} no encontrado en esta solicitud`);
+            if (!item) {
+                throw new Error(`Item ${itemAprobado.id} no existe en la base de datos`);
+            }
+
+            // Convertir a número para comparación (solicitudId puede venir como string de URL)
+            if (item.solicitudId !== parseInt(solicitudId)) {
+                throw new Error(`Item ${itemAprobado.id} pertenece a la solicitud ${item.solicitudId}, no a la ${solicitudId}`);
             }
 
             // Validar que la cantidad aprobada no sea mayor a la solicitada

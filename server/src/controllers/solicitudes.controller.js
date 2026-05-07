@@ -147,7 +147,10 @@ export const obtenerMisSolicitudesController = async (req, res) => {
         const usuarioId = req.usuario.id;
         const solicitudes = await obtenerMisSolicitudes(usuarioId);
 
-        return res.status(200).json(solicitudes);
+        return res.status(200).json({
+            solicitudes,
+            total: solicitudes.length
+        });
     } catch (error) {
         console.error('Error al obtener mis solicitudes:', error);
         return res.status(500).json({
@@ -164,7 +167,10 @@ export const obtenerMisSolicitudesController = async (req, res) => {
 export const obtenerSolicitudesPendientesController = async (req, res) => {
     try {
         const solicitudes = await obtenerSolicitudesPendientes();
-        return res.status(200).json(solicitudes);
+        return res.status(200).json({
+            solicitudes,
+            total: solicitudes.length
+        });
     } catch (error) {
         console.error('Error al obtener solicitudes pendientes:', error);
         return res.status(500).json({
@@ -181,7 +187,10 @@ export const obtenerSolicitudesPendientesController = async (req, res) => {
 export const obtenerSolicitudesAprobadasController = async (req, res) => {
     try {
         const solicitudes = await obtenerSolicitudesAprobadas();
-        return res.status(200).json(solicitudes);
+        return res.status(200).json({
+            solicitudes,
+            total: solicitudes.length
+        });
     } catch (error) {
         console.error('Error al obtener solicitudes aprobadas:', error);
         return res.status(500).json({
@@ -209,7 +218,8 @@ export const aprobarSolicitudController = async (req, res) => {
             });
         }
 
-        const solicitud = await aprobarSolicitud(id, items, aprobadoPorId);
+        // Convertir ID a número para evitar problemas de comparación
+        const solicitud = await aprobarSolicitud(parseInt(id), items, aprobadoPorId);
 
         // Emitir evento Socket.io
         try {
@@ -266,7 +276,8 @@ export const rechazarSolicitudController = async (req, res) => {
             });
         }
 
-        const solicitud = await rechazarSolicitud(id, motivo, rechazadoPorId);
+        // Convertir ID a número
+        const solicitud = await rechazarSolicitud(parseInt(id), motivo, rechazadoPorId);
 
         // Emitir evento Socket.io
         try {
@@ -316,7 +327,8 @@ export const procesarSolicitudController = async (req, res) => {
 
         const fechaSalida = fecha ? new Date(fecha) : new Date();
 
-        const resultado = await procesarSolicitud(id, procesadoPorId, fechaSalida);
+        // Convertir ID a número
+        const resultado = await procesarSolicitud(parseInt(id), procesadoPorId, fechaSalida);
 
         // Emitir evento Socket.io
         try {

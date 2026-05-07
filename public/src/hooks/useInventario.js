@@ -2,6 +2,15 @@ import { useEffect, useState, useCallback } from 'react';
 import API_URL from '../config/api';
 const API = API_URL;
 
+// Helper para obtener headers con token
+const getAuthHeaders = () => {
+  const token = sessionStorage.getItem('token');
+  return {
+    'Content-Type': 'application/json',
+    ...(token && { 'Authorization': `Bearer ${token}` })
+  };
+};
+
 export function useInventario() {
   const [inventario, setInventario] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -17,7 +26,12 @@ export function useInventario() {
     setError(null);
     setIsSearching(false);
     try {
-      const res = await fetch(`${API}/inventarios?page=${pageNum}&limit=${limit}`);
+      const token = sessionStorage.getItem('token');
+      const res = await fetch(`${API}/inventarios?page=${pageNum}&limit=${limit}`, {
+        headers: {
+          ...(token && { 'Authorization': `Bearer ${token}` })
+        }
+      });
       let data = null;
       try {
         data = await res.json();
@@ -69,7 +83,12 @@ export function useInventario() {
     setError(null);
     setIsSearching(true);
     try {
-      const res = await fetch(`${API}/inventarios/search?q=${encodeURIComponent(query.trim())}`);
+      const token = sessionStorage.getItem('token');
+      const res = await fetch(`${API}/inventarios/search?q=${encodeURIComponent(query.trim())}`, {
+        headers: {
+          ...(token && { 'Authorization': `Bearer ${token}` })
+        }
+      });
       let data = null;
       try {
         data = await res.json();
@@ -89,9 +108,16 @@ export function useInventario() {
   }, [refresh]);
 
   const uploadExcel = async (file) => {
+    const token = sessionStorage.getItem('token');
     const fd = new FormData();
     fd.append('file', file);
-    const res = await fetch(`${API}/inventarios/upload`, { method: 'POST', body: fd });
+    const res = await fetch(`${API}/inventarios/upload`, { 
+      method: 'POST', 
+      body: fd,
+      headers: {
+        ...(token && { 'Authorization': `Bearer ${token}` })
+      }
+    });
     let data = null;
     try {
       data = await res.json();
@@ -104,7 +130,7 @@ export function useInventario() {
   const updateItem = async (id, payload) => {
     const res = await fetch(`${API}/inventarios/${id}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       body: JSON.stringify(payload)
     });
     let d = null;

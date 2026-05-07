@@ -26,25 +26,26 @@ const Navbar = () => {
       </div>
 
       <div className="navbar-menu">
-        <Link to="/">Inventario</Link>
-        <Link to="/entradas">Entradas</Link>
-        <Link to="/salidas">Salidas</Link>
-
+        {/* MENÚ PARA ADMIN Y ENCARGADOS */}
         {esEncargadoOAdmin() && (
           <>
+            <Link to="/">Inventario</Link>
+            <Link to="/entradas">Entradas</Link>
+            <Link to="/salidas">Salidas</Link>
             <Link to="/solicitudes-pendientes">Pendientes</Link>
             <Link to="/solicitudes-aprobadas">Aprobadas</Link>
+            {esAdmin() && <Link to="/usuarios">Usuarios</Link>}
           </>
         )}
 
+        {/* MENÚ PARA SOLICITANTES */}
         {!esEncargadoOAdmin() && (
           <>
+            <Link to="/">Inicio</Link>
             <Link to="/nueva-solicitud">Nueva Solicitud</Link>
             <Link to="/mis-solicitudes">Mis Solicitudes</Link>
           </>
         )}
-
-        {esAdmin() && <Link to="/usuarios">Usuarios</Link>}
       </div>
 
       <div className="navbar-actions">

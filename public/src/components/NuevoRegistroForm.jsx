@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import API_URL from '../config/api';
 import { useToast } from '../context/ToastContext.jsx';
 import ProductoAutocomplete from './ProductoAutocomplete.jsx';
+import { fetchWithAuth } from '../utils/fetchHelpers';
 
 
 const NuevoRegistroForm = ({ onSuccess }) => {
@@ -32,9 +33,8 @@ const NuevoRegistroForm = ({ onSuccess }) => {
     try {
       // Convertir fecha a formato ISO (YYYY-MM-DDTHH:mm:ss.sssZ)
       const fechaISO = fecha ? new Date(fecha).toISOString() : null;
-      const res = await fetch(`${API_URL}/entradas`, {
+      const res = await fetchWithAuth(`${API_URL}/entradas`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ articulo, cantidad: Number(cantidad), codigo, fecha: fechaISO })
       });
   if (!res.ok) { let data=null; try { data=await res.json(); } catch {}; throw new Error(data?.error || 'Error al crear la entrada'); }

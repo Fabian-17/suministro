@@ -27,7 +27,12 @@ const EncargadoAutocomplete = ({
 
   // Cargar todos los encargados
   useEffect(() => {
-    fetch(`${API_URL}/encargados`)
+    const token = sessionStorage.getItem('token');
+    fetch(`${API_URL}/encargados`, {
+      headers: {
+        ...(token && { 'Authorization': `Bearer ${token}` })
+      }
+    })
       .then(r => r.json())
       .then(data => setAllEncargados(Array.isArray(data) ? data : []))
       .catch(() => setAllEncargados([]));

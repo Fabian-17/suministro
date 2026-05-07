@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useToast } from '../context/ToastContext.jsx';
+import API_URL from '../config/api';
+import { fetchWithAuth } from '../utils/fetchHelpers';
 
 const EditarRegistroForm = ({ registro, onSuccess, onCancel }) => {
   const [articulo, setArticulo] = useState(registro.articulo);
@@ -14,9 +16,8 @@ const EditarRegistroForm = ({ registro, onSuccess, onCancel }) => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${API_URL}/inventarios/${registro.id}`, {
+      const res = await fetchWithAuth(`${API_URL}/inventarios/${registro.id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ articulo, cantidad: Number(cantidad), codigo })
       });
   if (!res.ok) { let data=null; try{ data=await res.json(); }catch{}; throw new Error(data?.error || 'Error al editar el registro'); }

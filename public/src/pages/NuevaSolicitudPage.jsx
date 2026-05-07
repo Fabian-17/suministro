@@ -105,7 +105,24 @@ const NuevaSolicitudPage = () => {
       <form onSubmit={handleSubmit} className="solicitud-form">
         <div className="form-section">
           <h3>Agregar Artículos</h3>
-          <ProductoAutocomplete onProductoSeleccionado={agregarItem} />
+          <ProductoAutocomplete 
+            onProductoSeleccionado={agregarItem}
+            validateExists={true}
+            placeholder="🔍 Buscar artículos por nombre o código..."
+            showStock={true}
+          />
+          {items.length === 0 && (
+            <div style={{ 
+              marginTop: '1rem', 
+              padding: '1rem', 
+              background: '#e3f2fd', 
+              borderRadius: '6px',
+              color: '#1976d2',
+              fontSize: '0.9rem'
+            }}>
+              💡 <strong>Tip:</strong> Busca y selecciona artículos del inventario para agregarlos a tu solicitud
+            </div>
+          )}
         </div>
 
         {items.length > 0 && (
@@ -167,10 +184,27 @@ const NuevaSolicitudPage = () => {
           <button type="button" onClick={() => navigate(-1)} className="btn-secondary">
             Cancelar
           </button>
-          <button type="submit" disabled={cargando || items.length === 0} className="btn-primary">
-            {cargando ? 'Creando...' : 'Crear Solicitud'}
+          <button 
+            type="submit" 
+            disabled={cargando || items.length === 0} 
+            className="btn-primary"
+            title={items.length === 0 ? 'Debes agregar al menos un artículo' : ''}
+          >
+            {cargando ? '⏳ Creando...' : '✅ Crear Solicitud'}
           </button>
         </div>
+        
+        {items.length === 0 && (
+          <div style={{ 
+            marginTop: '1rem', 
+            textAlign: 'center',
+            color: '#999',
+            fontSize: '0.9rem',
+            fontStyle: 'italic'
+          }}>
+            El botón se habilitará cuando agregues al menos un artículo
+          </div>
+        )}
       </form>
     </div>
   );

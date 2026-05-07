@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import API_URL from '../config/api';
+import { fetchWithAuth } from '../utils/fetchHelpers';
 
 const CrearArea = ({ onCreate }) => {
   const [nombre, setNombre] = useState('');
@@ -10,9 +12,8 @@ const CrearArea = ({ onCreate }) => {
     setError(null);
     setSuccess(null);
     try {
-      const res = await fetch(`${API_URL}/areas`, {
+      const res = await fetchWithAuth(`${API_URL}/areas`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ nombre })
       });
       if (!res.ok) {

@@ -8,15 +8,19 @@ import {
   getAreasByEncargadoController,
   deleteEncargadoController
 } from '../controllers/encargados.controller.js';
+import { verificarToken, soloEncargados } from '../middlewares/auth.js';
 
 const router = Router();
 
-router.get('/', getAllEncargadosController);
-router.post('/', createEncargadoWithAreasController);
-router.post('/assign', assignEncargadoToAreasController);
-router.post('/remove', removeEncargadoFromAreaController);
-router.get('/area/:areaId', getEncargadosByAreaController);
-router.get('/encargado/:encargadoId', getAreasByEncargadoController);
-router.delete('/encargado/:id', deleteEncargadoController);
+// Todos pueden ver encargados
+router.get('/', verificarToken, getAllEncargadosController);
+router.get('/area/:areaId', verificarToken, getEncargadosByAreaController);
+router.get('/encargado/:encargadoId', verificarToken, getAreasByEncargadoController);
+
+// Solo encargados y admin pueden modificar
+router.post('/', verificarToken, soloEncargados, createEncargadoWithAreasController);
+router.post('/assign', verificarToken, soloEncargados, assignEncargadoToAreasController);
+router.post('/remove', verificarToken, soloEncargados, removeEncargadoFromAreaController);
+router.delete('/encargado/:id', verificarToken, soloEncargados, deleteEncargadoController);
 
 export default router;

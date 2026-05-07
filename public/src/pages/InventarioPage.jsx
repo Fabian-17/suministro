@@ -6,7 +6,9 @@ import EncargadoAutocomplete from '../components/EncargadoAutocomplete';
 import { useNavigate } from 'react-router-dom';
 import { useInventario } from '../hooks/useInventario.js';
 import { useToast } from '../context/ToastContext.jsx';
+import { useAuth } from '../context/AuthContext';
 import API_URL from '../config/api';
+import { fetchWithAuth } from '../utils/fetchHelpers';
 
 
 const InventarioPage = () => {
@@ -19,6 +21,7 @@ const InventarioPage = () => {
   const fileInputRef = useRef();
   const [editRegistro, setEditRegistro] = useState(null);
   const { showToast } = useToast();
+  const { esEncargadoOAdmin } = useAuth();
   const tableContainerRef = useRef(null);
   const searchTimeoutRef = useRef(null);
   
@@ -62,11 +65,11 @@ const InventarioPage = () => {
 
   // Cargar áreas y encargados para formulario de salida
   useEffect(() => {
-    fetch(`${API_URL}/areas`)
+    fetchWithAuth(`${API_URL}/areas`)
       .then(r => r.json())
       .then(data => setAreas(Array.isArray(data) ? data : []));
     
-    fetch(`${API_URL}/encargados`)
+    fetchWithAuth(`${API_URL}/encargados`)
       .then(r => r.json())
       .then(data => setEncargados(Array.isArray(data) ? data : []));
   }, []);
@@ -74,7 +77,7 @@ const InventarioPage = () => {
   // Filtrar encargados por área seleccionada
   useEffect(() => {
     if (salidaForm.areaId) {
-      fetch(`${API_URL}/encargados/area/${salidaForm.areaId}`)
+      fetchWithAuth(`${API_URL}/encargados/area/${salidaForm.areaId}`)
         .then(r => r.json())
         .then(data => setFilteredEncargados(Array.isArray(data) ? data : []))
         .catch(() => setFilteredEncargados([]));
@@ -86,7 +89,7 @@ const InventarioPage = () => {
   // Filtrar áreas por encargado seleccionado
   useEffect(() => {
     if (salidaForm.encargadoId) {
-      fetch(`${API_URL}/encargados/encargado/${salidaForm.encargadoId}`)
+      fetchWithAuth(`${API_URL}/encargados/encargado/${salidaForm.encargadoId}`)
         .then(r => r.json())
         .then(data => setFilteredAreas(Array.isArray(data) ? data : []))
         .catch(() => setFilteredAreas([]));
@@ -135,9 +138,8 @@ const InventarioPage = () => {
       // Si es un encargado nuevo (no tiene ID), crearlo en el backend
       if (selectedEncargado.isNew && !selectedEncargado.id) {
         try {
-          const createEncargadoRes = await fetch(`${API_URL}/encargados`, {
+          const createEncargadoRes = await fetchWithAuth(`${API_URL}/encargados`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
               nombre: selectedEncargado.nombre.trim(),
               areaIds: salidaForm.areaId ? [Number(salidaForm.areaId)] : []
@@ -156,9 +158,8 @@ const InventarioPage = () => {
         }
       }
       
-      const res = await fetch(`${API_URL}/salidas`, {
+      const res = await fetchWithAuth(`${API_URL}/salidas`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           articulo: selectedProductoSalida.articulo,
           codigo: selectedProductoSalida.codigo,
@@ -252,111 +253,116 @@ const InventarioPage = () => {
         boxShadow: '0 2px 8px rgba(0,0,0,0.06)'
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
-          <h2 style={{ margin: 0, color: '#1976d2' }}>Inventario General</h2>
-          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-            <button 
-              className="btn btn-info" 
-              onClick={() => navigate('/entradas')}
-              style={{ fontSize: '0.9rem' }}
-            >
-              Ver Historial Entradas
-            </button>
-            <button 
-              className="btn btn-warning" 
-              onClick={() => navigate('/salidas')}
-              style={{ fontSize: '0.9rem' }}
-            >
-              Ver Historial Salidas
-            </button>
-            <button 
-              className="btn btn-success" 
-              onClick={() => navigate('/encargados-area')}
-              style={{ fontSize: '0.9rem' }}
-            >
-              Encargados
-            </button>
-            <button 
-              className="btn btn-secondary" 
-              onClick={() => navigate('/nota-pedido-semanal')}
-              style={{ fontSize: '0.9rem' }}
-            >
-              Nota Pedido
-            </button>
-          </div>
+          
+          {/* Botones solo para encargados y admin */}
+          {esEncargadoOAdmin() && (
+            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+              <button 
+                className="btn btn-info" 
+                onClick={() => navigate('/entradas')}
+                style={{ fontSize: '0.9rem' }}
+              >
+                Ver Historial Entradas
+              </button>
+              <button 
+                className="btn btn-warning" 
+                onClick={() => navigate('/salidas')}
+                style={{ fontSize: '0.9rem' }}
+              >
+                Ver Historial Salidas
+              </button>
+              <button 
+                className="btn btn-success" 
+                onClick={() => navigate('/encargados-area')}
+                style={{ fontSize: '0.9rem' }}
+              >
+                Encargados
+              </button>
+              <button 
+                className="btn btn-secondary" 
+                onClick={() => navigate('/nota-pedido-semanal')}
+                style={{ fontSize: '0.9rem' }}
+              >
+                Nota Pedido
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Layout de dos columnas */}
+      {/* Layout: Solo mostrar formularios a encargados/admin */}
       <div style={{ 
         display: 'grid', 
-        gridTemplateColumns: '420px 1fr',
+        gridTemplateColumns: esEncargadoOAdmin() ? '420px 1fr' : '1fr',
         gap: 20,
         alignItems: 'start'
       }}>
-        {/* COLUMNA IZQUIERDA - Formulario fijo */}
-        <div style={{ 
-          background: '#fff', 
-          borderRadius: 12, 
-          padding: '24px',
-          boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
-          position: 'sticky',
-          top: 20
-        }}>
-          {/* Tabs para alternar entre Entrada y Salida */}
+        {/* COLUMNA IZQUIERDA - Formulario fijo (solo encargados/admin) */}
+        {esEncargadoOAdmin() && (
           <div style={{ 
-            display: 'flex', 
-            gap: 8, 
-            marginBottom: 20,
-            borderBottom: '2px solid #e0e0e0'
+            background: '#fff', 
+            borderRadius: 12, 
+            padding: '24px',
+            boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
+            position: 'sticky',
+            top: 20
           }}>
-            <button
-              onClick={() => setFormularioActivo('entrada')}
-              style={{
-                flex: 1,
-                padding: '12px',
-                border: 'none',
-                background: formularioActivo === 'entrada' ? '#1976d2' : 'transparent',
-                color: formularioActivo === 'entrada' ? '#fff' : '#666',
-                fontWeight: 600,
-                cursor: 'pointer',
-                borderRadius: '8px 8px 0 0',
-                transition: 'all 0.2s'
-              }}
-            >
-              Entrada
-            </button>
-            <button
-              onClick={() => setFormularioActivo('salida')}
-              style={{
-                flex: 1,
-                padding: '12px',
-                border: 'none',
-                background: formularioActivo === 'salida' ? '#ff9800' : 'transparent',
-                color: formularioActivo === 'salida' ? '#fff' : '#666',
-                fontWeight: 600,
-                cursor: 'pointer',
-                borderRadius: '8px 8px 0 0',
-                transition: 'all 0.2s'
-              }}
-            >
-              Salida
-            </button>
-          </div>
+            {/* Tabs para alternar entre Entrada y Salida */}
+            <div style={{ 
+              display: 'flex', 
+              gap: 8, 
+              marginBottom: 20,
+              borderBottom: '2px solid #e0e0e0'
+            }}>
+              <button
+                onClick={() => setFormularioActivo('entrada')}
+                style={{
+                  flex: 1,
+                  padding: '12px',
+                  border: 'none',
+                  background: formularioActivo === 'entrada' ? '#1976d2' : 'transparent',
+                  color: formularioActivo === 'entrada' ? '#fff' : '#666',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  borderRadius: '8px 8px 0 0',
+                  transition: 'all 0.2s'
+                }}
+              >
+                Entrada
+              </button>
+              <button
+                onClick={() => setFormularioActivo('salida')}
+                style={{
+                  flex: 1,
+                  padding: '12px',
+                  border: 'none',
+                  background: formularioActivo === 'salida' ? '#ff9800' : 'transparent',
+                  color: formularioActivo === 'salida' ? '#fff' : '#666',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  borderRadius: '8px 8px 0 0',
+                  transition: 'all 0.2s'
+                }}
+              >
+                Salida
+              </button>
+            </div>
 
-          {/* Formulario de Entrada */}
-          {formularioActivo === 'entrada' && (
-            <>
-              <h3 style={{ 
-                marginTop: 0, 
-                marginBottom: 20, 
-                color: '#1976d2',
-                fontSize: '1.2rem'
-              }}>
-                ➕ Nueva Entrada
-              </h3>
-              <NuevoRegistroForm onSuccess={() => {
-                refresh();
-                showToast('Entrada registrada correctamente', 'success');
+            {/* Formulario de Entrada */}
+            {formularioActivo === 'entrada' && (
+              <>
+                <h3 style={{ 
+                  marginTop: 0, 
+                  marginBottom: 20, 
+                  color: '#1976d2',
+                  fontSize: '1.2rem'
+                }}>
+                  ➕ Nueva Entrada
+                </h3>
+                <NuevoRegistroForm onSuccess={() => {
+                  refresh();
+                  showToast('Entrada registrada correctamente', 'success');
+                  showToast('Entrada registrada correctamente', 'success');
               }} />
 
               {/* Formulario para subir Excel */}
@@ -528,6 +534,7 @@ const InventarioPage = () => {
             </>
           )}
         </div>
+        )}
 
         {/* COLUMNA DERECHA - Inventario */}
         <div style={{ 
@@ -621,14 +628,16 @@ const InventarioPage = () => {
                   <th style={{ position: 'sticky', top: 0, background: '#f0f4f8', border: '1px solid #e0e0e0', padding: '12px 8px', width: '12%', zIndex: 2, fontWeight: 600, textAlign: 'center' }}>Entrada</th>
                   <th style={{ position: 'sticky', top: 0, background: '#f0f4f8', border: '1px solid #e0e0e0', padding: '12px 8px', width: '12%', zIndex: 2, fontWeight: 600, textAlign: 'center' }}>Salida</th>
                   <th style={{ position: 'sticky', top: 0, background: '#f0f4f8', border: '1px solid #e0e0e0', padding: '12px 8px', width: '15%', zIndex: 2, fontWeight: 600, textAlign: 'center' }}>Stock Actual</th>
-                  <th style={{ position: 'sticky', top: 0, background: '#f0f4f8', border: '1px solid #e0e0e0', padding: '12px 8px', width: '8%', zIndex: 2, fontWeight: 600, textAlign: 'center' }}>Editar</th>
+                  {esEncargadoOAdmin() && (
+                    <th style={{ position: 'sticky', top: 0, background: '#f0f4f8', border: '1px solid #e0e0e0', padding: '12px 8px', width: '8%', zIndex: 2, fontWeight: 600, textAlign: 'center' }}>Editar</th>
+                  )}
                 </tr>
               </thead>
               <tbody>
                 {loading && page === 1 ? (
-                  <tr><td colSpan={6} style={{ textAlign: 'center', padding: 32, color: '#999' }}>⏳ Cargando inventario...</td></tr>
+                  <tr><td colSpan={esEncargadoOAdmin() ? 6 : 5} style={{ textAlign: 'center', padding: 32, color: '#999' }}>⏳ Cargando inventario...</td></tr>
                 ) : filtered.length === 0 ? (
-                  <tr><td colSpan={6} style={{ textAlign: 'center', padding: 32, color: '#999' }}>
+                  <tr><td colSpan={esEncargadoOAdmin() ? 6 : 5} style={{ textAlign: 'center', padding: 32, color: '#999' }}>
                     {search ? '❌ No hay resultados para tu búsqueda' : '📦 No hay artículos en el inventario'}
                   </td></tr>
                 ) : (
@@ -672,29 +681,33 @@ const InventarioPage = () => {
                         }}>
                           {cantidadActual}
                         </td>
-                        <td style={{ border: '1px solid #e2e2e2', padding: '10px 8px', textAlign: 'center' }}>
-                          <button
-                            title="Editar registro"
-                            style={{ 
-                              background: 'none', 
-                              border: 'none', 
-                              cursor: 'pointer', 
-                              padding: 4,
-                              borderRadius: 4,
-                              transition: 'background 0.2s'
-                            }}
-                            onClick={() => setEditRegistro(i)}
-                            onMouseEnter={e => e.currentTarget.style.background = '#e3f2fd'}
-                            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                          >
-                            <span role="img" aria-label="editar" style={{ fontSize: 20 }}>✏️</span>
-                          </button>
-                        </td>
+                        
+                        {/* Columna de acciones - solo para encargados/admin */}
+                        {esEncargadoOAdmin() && (
+                          <td style={{ border: '1px solid #e2e2e2', padding: '10px 8px', textAlign: 'center' }}>
+                            <button
+                              title="Editar registro"
+                              style={{ 
+                                background: 'none', 
+                                border: 'none', 
+                                cursor: 'pointer', 
+                                padding: 4,
+                                borderRadius: 4,
+                                transition: 'background 0.2s'
+                              }}
+                              onClick={() => setEditRegistro(i)}
+                              onMouseEnter={e => e.currentTarget.style.background = '#e3f2fd'}
+                              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                            >
+                              <span role="img" aria-label="editar" style={{ fontSize: 20 }}>✏️</span>
+                            </button>
+                          </td>
+                        )}
                       </tr>
                     );})}
                     {loading && page > 1 && (
                       <tr>
-                        <td colSpan={6} style={{ textAlign: 'center', padding: '16px', background: '#f9f9f9', color: '#666', fontSize: '0.9rem' }}>
+                        <td colSpan={esEncargadoOAdmin() ? 6 : 5} style={{ textAlign: 'center', padding: '16px', background: '#f9f9f9', color: '#666', fontSize: '0.9rem' }}>
                           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
                             <div style={{ 
                               width: 16, 
