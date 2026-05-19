@@ -24,6 +24,11 @@ export const Solicitudes = sequelize.define("solicitudes", {
         type: DataTypes.TEXT,
         allowNull: true
     },
+    justificacion: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+        comment: 'Justificación formal para el documento de solicitud (ej: EJECUCION DE OBRAS DE REPARACION Y MANTENIMIENTO)'
+    },
     motivo_rechazo: {
         type: DataTypes.TEXT,
         allowNull: true

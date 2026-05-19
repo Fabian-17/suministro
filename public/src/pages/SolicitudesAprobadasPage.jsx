@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import SolicitudPrintView from '../components/SolicitudPrintView';
 import API_URL from '../config/api';
 import '../styles/Solicitudes.css';
 
@@ -11,6 +12,7 @@ const SolicitudesAprobadasPage = () => {
   const [solicitudSeleccionada, setSolicitudSeleccionada] = useState(null);
   const [fechaSalida, setFechaSalida] = useState('');
   const [procesando, setProcesando] = useState(false);
+  const [solicitudParaImprimir, setSolicitudParaImprimir] = useState(null);
   const { token } = useAuth();
 
   useEffect(() => {
@@ -163,6 +165,9 @@ const SolicitudesAprobadasPage = () => {
               </div>
 
               <div className="card-actions">
+                <button onClick={() => setSolicitudParaImprimir(solicitud)} className="btn-secondary">
+                  🖨️ Ver/Imprimir
+                </button>
                 <button onClick={() => abrirModalProcesar(solicitud)} className="btn-primary">
                   🎉 Procesar y Generar Salidas
                 </button>
@@ -229,6 +234,14 @@ const SolicitudesAprobadasPage = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Modal de impresión */}
+      {solicitudParaImprimir && (
+        <SolicitudPrintView 
+          solicitud={solicitudParaImprimir}
+          onClose={() => setSolicitudParaImprimir(null)}
+        />
       )}
     </div>
   );

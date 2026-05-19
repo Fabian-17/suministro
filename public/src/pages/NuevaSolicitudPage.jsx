@@ -8,6 +8,7 @@ import '../styles/Solicitudes.css';
 const NuevaSolicitudPage = () => {
   const [items, setItems] = useState([]);
   const [observaciones, setObservaciones] = useState('');
+  const [justificacion, setJustificacion] = useState('');
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState('');
   const { token, usuario } = useAuth();
@@ -73,6 +74,7 @@ const NuevaSolicitudPage = () => {
             cantidad: item.cantidad,
           })),
           observaciones: observaciones || null,
+          justificacion: justificacion || null,
         }),
       });
 
@@ -168,6 +170,21 @@ const NuevaSolicitudPage = () => {
             </table>
           </div>
         )}
+
+        <div className="form-section">
+          <h3>Justificación <span style={{color: '#d32f2f'}}>*</span></h3>
+          <textarea
+            value={justificacion}
+            onChange={(e) => setJustificacion(e.target.value)}
+            placeholder="Ej: EJECUCION DE OBRAS DE REPARACION Y MANTENIMIENTO"
+            rows={3}
+            className="textarea-observaciones"
+            required
+          />
+          <small style={{color: '#666', fontSize: '0.85rem'}}>
+            Esta justificación aparecerá en el documento oficial de solicitud
+          </small>
+        </div>
 
         <div className="form-section">
           <h3>Observaciones (Opcional)</h3>

@@ -17,7 +17,7 @@ import {
  */
 export const crearSolicitudController = async (req, res) => {
     try {
-        const { items, observaciones } = req.body;
+        const { items, observaciones, justificacion } = req.body;
         const usuarioId = req.usuario.id;
 
         // Validaciones
@@ -38,7 +38,7 @@ export const crearSolicitudController = async (req, res) => {
             }
         }
 
-        const solicitud = await crearSolicitud(usuarioId, items, observaciones);
+        const solicitud = await crearSolicitud(usuarioId, items, observaciones, justificacion);
 
         // Emitir evento Socket.io (si está configurado)
         try {

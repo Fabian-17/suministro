@@ -17,7 +17,7 @@ import {
 /**
  * Crear nueva solicitud
  */
-export const crearSolicitud = async (usuarioId, items, observaciones = '') => {
+export const crearSolicitud = async (usuarioId, items, observaciones = '', justificacion = '') => {
     const transaction = await sequelize.transaction();
     
     try {
@@ -79,6 +79,7 @@ export const crearSolicitud = async (usuarioId, items, observaciones = '') => {
             areaId,
             estado: 'pendiente',
             observaciones,
+            justificacion,
             fecha_solicitud: new Date()
         }, { transaction });
 

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
 import { useNavigate } from 'react-router-dom';
+import SolicitudPrintView from '../components/SolicitudPrintView';
 import API_URL from '../config/api';
 import '../styles/Solicitudes.css';
 
@@ -10,6 +11,7 @@ const MisSolicitudesPage = () => {
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState('');
   const [filtro, setFiltro] = useState('todas'); // todas, pendiente, aprobada, rechazada, procesada
+  const [solicitudParaImprimir, setSolicitudParaImprimir] = useState(null);
   const { token } = useAuth();
   const { socket, conectado } = useSocket();
   const navigate = useNavigate();
@@ -205,20 +207,34 @@ const MisSolicitudesPage = () => {
                   )}
                 </div>
 
-                {solicitud.estado === 'pendiente' && (
-                  <div className="card-actions">
+                <div className="card-actions">
+                  <button
+                    onClick={() => setSolicitudParaImprimir(solicitud)}
+                    className="btn-secondary"
+                  >
+                    🖨️ Ver/Imprimir
+                  </button>
+                  {solicitud.estado === 'pendiente' && (
                     <button
                       onClick={() => eliminarSolicitud(solicitud.id)}
                       className="btn-danger"
                     >
                       Eliminar
                     </button>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
             );
           })}
         </div>
+      )}
+
+      {/* Modal de impresión */}
+      {solicitudParaImprimir && (
+        <SolicitudPrintView 
+          solicitud={solicitudParaImprimir}
+          onClose={() => setSolicitudParaImprimir(null)}
+        />
       )}
     </div>
   );

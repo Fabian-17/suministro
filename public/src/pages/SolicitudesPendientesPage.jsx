@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
+import SolicitudPrintView from '../components/SolicitudPrintView';
 import API_URL from '../config/api';
 import '../styles/Solicitudes.css';
 
@@ -10,9 +11,10 @@ const SolicitudesPendientesPage = () => {
   const [error, setError] = useState('');
   const [modalAbierto, setModalAbierto] = useState(false);
   const [solicitudSeleccionada, setSolicitudSeleccionada] = useState(null);
-  const [accion, setAccion] = useState(null); // 'aprobar' | 'rechazar'
+  const [accion, setAccion] = useState(null); // 'aprobar' o 'rechazar'
   const [motivoRechazo, setMotivoRechazo] = useState('');
   const [itemsAprobados, setItemsAprobados] = useState([]);
+  const [solicitudParaImprimir, setSolicitudParaImprimir] = useState(null);
   const { token } = useAuth();
   const { socket, conectado } = useSocket();
 
@@ -225,6 +227,9 @@ const SolicitudesPendientesPage = () => {
               </div>
 
               <div className="card-actions">
+                <button onClick={() => setSolicitudParaImprimir(solicitud)} className="btn-secondary">
+                  🖨️ Ver/Imprimir
+                </button>
                 <button onClick={() => abrirModalRechazar(solicitud)} className="btn-danger">
                   ❌ Rechazar
                 </button>
@@ -321,6 +326,14 @@ const SolicitudesPendientesPage = () => {
             )}
           </div>
         </div>
+      )}
+
+      {/* Modal de impresión */}
+      {solicitudParaImprimir && (
+        <SolicitudPrintView 
+          solicitud={solicitudParaImprimir}
+          onClose={() => setSolicitudParaImprimir(null)}
+        />
       )}
     </div>
   );
