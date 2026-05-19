@@ -252,7 +252,7 @@ const InventarioPage = () => {
         marginBottom: 20,
         boxShadow: '0 2px 8px rgba(0,0,0,0.06)'
       }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
           
           {/* Botones solo para encargados y admin */}
           {esEncargadoOAdmin() && (

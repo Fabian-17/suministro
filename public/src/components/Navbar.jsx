@@ -30,8 +30,6 @@ const Navbar = () => {
         {esEncargadoOAdmin() && (
           <>
             <Link to="/">Inventario</Link>
-            <Link to="/entradas">Entradas</Link>
-            <Link to="/salidas">Salidas</Link>
             <Link to="/solicitudes-pendientes">Pendientes</Link>
             <Link to="/solicitudes-aprobadas">Aprobadas</Link>
             {esAdmin() && <Link to="/usuarios">Usuarios</Link>}
