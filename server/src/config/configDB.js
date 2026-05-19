@@ -32,5 +32,14 @@ export const sequelize = new Sequelize(
         port: process.env.DB_PORT,
         dialect: 'mysql',
         logging: (msg) => logStream.write(`${msg}\n`),
+        pool: {
+            max: 15,          // Máximo 15 conexiones simultáneas
+            min: 0,           // No crear conexiones al inicio
+            acquire: 30000,   // Tiempo máximo para adquirir conexión: 30 segundos
+            idle: 10000,      // Tiempo antes de liberar conexión inactiva: 10 segundos
+        },
+        dialectOptions: {
+            connectTimeout: 10000  // Timeout de conexión inicial: 10 segundos
+        }
     }
 )

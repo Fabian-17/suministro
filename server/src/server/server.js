@@ -61,24 +61,29 @@ app.use(router);
 // Start server
 export const startServer = async () => {
     try {
-        // Conectar a la base de datos
+        // Iniciar servidor HTTP primero (para que responda inmediatamente)
+        httpServer.listen(PORT, () => {
+            console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+            console.log(`🚀 Servidor iniciado en puerto ${PORT}`);
+            console.log(`📡 API disponible en: http://localhost:${PORT}`);
+            console.log('⏳ Conectando a la base de datos...');
+            console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        });
+
+        // Conectar a la base de datos (en segundo plano)
         await connectDB();
         
-        // Inicializar Socket.io
+        // Inicializar Socket.io después de conectar DB
         const io = initializeSocket(httpServer);
         
         // Guardar instancia de io en app para usar en controladores
         app.set('io', io);
         
-        // Iniciar servidor HTTP
-        httpServer.listen(PORT, () => {
-            console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-            console.log(`🚀 Servidor iniciado en puerto ${PORT}`);
-            console.log(`📡 API disponible en: http://localhost:${PORT}`);
-            console.log(`🔌 Socket.io inicializado correctamente`);
-            console.log(`🌐 CORS habilitado para: ${process.env.FRONTEND_URL || 'http://localhost:5173'}`);
-            console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-        });
+        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        console.log(`🔌 Socket.io inicializado correctamente`);
+        console.log(`🌐 CORS habilitado para: ${process.env.FRONTEND_URL || 'http://localhost:5173'}`);
+        console.log('✅ Sistema completamente operativo');
+        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     } catch (error) {
         console.error('❌ Error al iniciar el servidor:', error);
         process.exit(1);
