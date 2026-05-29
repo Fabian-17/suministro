@@ -31,7 +31,8 @@ const UsuariosPage = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await response.json();
-      setUsuarios(data.usuarios || []);
+      // Backend devuelve array directo, no objeto con propiedad usuarios
+      setUsuarios(Array.isArray(data) ? data : (data.usuarios || []));
     } catch (err) {
       setError(err.message);
     } finally {
