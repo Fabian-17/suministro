@@ -303,6 +303,10 @@ export default function NotaPedidoSemanal() {
               value={articulo}
               onChange={e => setArticulo(e.target.value)}
               onKeyPress={e => e.key === 'Enter' && agregarItem()}
+              autoCorrect="off"
+              autoCapitalize="off"
+              spellCheck={false}
+              translate="no"
               style={{ 
                 flex: 1,
                 padding: '12px 16px',
@@ -429,7 +433,9 @@ export default function NotaPedidoSemanal() {
                       }}>
                         {idx + 1}
                       </td>
-                      <td style={{ 
+                      <td 
+                      translate="no"
+                      style={{ 
                         padding: '12px 16px',
                         fontWeight: 500,
                         color: '#333'
